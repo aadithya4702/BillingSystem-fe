@@ -2,6 +2,7 @@ import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Analytics from "./Analytics";
+import Order from "./Order";
 
 // Dummy components for different pages
 const Home = () => <div>Home Page Content</div>;
@@ -16,9 +17,9 @@ const Dashboard = () => {
     <Router>
       <div className="flex">
         <Sidebar />
-        <div className="flex-grow p-4">
+        <div className="flex-grow ">
           <Routes>
-            <Route path="/home" element={<Home />} />
+            <Route path="/home" element={<Order />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/offers" element={<Offers />} />
             <Route path="/messages" element={<Messages />} />

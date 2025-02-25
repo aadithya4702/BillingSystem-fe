@@ -27,7 +27,7 @@ import OrderReport from "../components/OrderReport";
 const Analytics = () => {
   return (
     <div>
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex p-4 flex-col lg:flex-row gap-4">
         <div className="p-2 space-y-4 w-full lg:w-3/4">
           <Title />
           <Cards />
