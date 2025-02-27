@@ -1,105 +1,28 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-import Axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
-
-Axios.defaults.baseURL = "https://backend-exu9.onrender.com/api";
-Axios.defaults.withCredentials = true;
+import { toast } from "react-toastify";
+import { registerUser, loginUser } from "../api/Signin";
 
 const Signin = () => {
   const [signup, setSignup] = useState(false);
-  const [otpverifyshow, setotpverifyshow] = useState(false);
-  const [otpFields, setOtpFields] = useState(["", "", "", "", "", ""]);
   const [forgetPassword, setForgetPassword] = useState(false);
-  // const navigate = useNavigate();
   const [user, setUser] = useState({
     name: "",
-    mobile: "",
+    email: "",
     password: "",
+    c_password: "",
   });
 
   const clearUserData = () => {
-    setUser({
-      name: "",
-      mobile: "",
-      password: "",
-    });
-    setOtpFields(["", "", "", "", "", ""]);
+    setUser({ name: "", email: "", password: "", c_password: "" });
   };
 
-  const forgetPasswordShow = () => {
-    setForgetPassword(!true);
-  };
-
-  //otp
-  const handleChange = (index, value) => {
-    const newOtpFields = [...otpFields];
-    newOtpFields[index] = value;
-
-    if (value !== "" && index < otpFields.length - 1) {
-      // Move to the next input field
-      document.getElementById(`otp_val_${index + 1}`).focus();
-    }
-
-    setOtpFields(newOtpFields);
-  };
-
-  const handleBackspace = (index, e) => {
-    if (e.key === "Backspace" && index >= 0) {
-      // Clear the value in the current input field
-      const newOtpFields = [...otpFields];
-      newOtpFields[index] = "";
-
-      // Move to the previous input field
-      if (index > 0) {
-        document.getElementById(`otp_val_${index - 1}`).focus();
-      }
-
-      setOtpFields(newOtpFields);
-    }
-  };
-
-  //otp validation
-  const handleotpvalidation = async () => {
-    try {
-      const { name, mobile, password } = user;
-      const otp = otpFields.join("");
-      const response = await Axios.post("/users/otpvalidation", {
-        otp: otp,
-        mobile,
-        name,
-        password,
-      });
-
-      if (response.status === 200) {
-        toast.success("E-Mail verified", {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-        clearUserData(); // Clear user data after successful verification
-        setSignup(!signup);
-        setotpverifyshow(!otpverifyshow);
-      } else {
-        const errorMessage = response.data.message || "Unknown error occurred";
-        toast.error(errorMessage, {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-      }
-    } catch (error) {
-      console.error("Error during OTP validation:", error);
-      const errorMessage =
-        error.response?.data.message || "Unknown error occurred";
-      toast.error(errorMessage, {
-        position: toast.POSITION.TOP_RIGHT,
-      });
-    }
-  };
   const toggleSignup = () => {
     setSignup(!signup);
     clearUserData();
+  };
+
+  const forgetPasswordShow = () => {
+    setForgetPassword(!forgetPassword);
   };
 
   const handleInputChange = (e) => {
@@ -109,296 +32,160 @@ const Signin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, mobile, password } = user;
+    const { name, email, password, c_password } = user;
 
     if (signup) {
       if (password.length < 8) {
-        toast.error("Provide a strong password!", {
+        toast.error("Password must be at least 8 characters long!", {
           position: toast.POSITION.TOP_RIGHT,
         });
-      } else {
-        try {
-          // Make an Axios POST request to your sign-up API endpoint
-          const response = await Axios.post("/users/", {
-            name,
-            mobile,
-            password,
-          });
+        return;
+      }
 
-          // Check the response status and display a success or error toast
-          if (response.status === 200) {
-            toast.success("OTP has sent to the mail!", {
-              position: toast.POSITION.TOP_RIGHT,
-            });
+      if (password !== c_password) {
+        toast.error("Passwords do not match!", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+        return;
+      }
 
-            setotpverifyshow(!otpverifyshow);
-          } else {
-            toast.error("Registration failed", {
-              position: toast.POSITION.TOP_RIGHT,
-            });
-          }
-        } catch (error) {
-          // Check if the error is an Axios error with a response
-          if (error.response) {
-            const { status, data } = error.response;
-
-            if (status === 409) {
-              // User already exists
-              toast.error(data.message, {
-                position: toast.POSITION.TOP_RIGHT,
-              });
-            } else {
-              // Other status codes, display a generic error message
-              toast.error("Registration failed", {
-                position: toast.POSITION.TOP_RIGHT,
-              });
-            }
-          } else {
-            // Network error or other issues
-            toast.error("Error during registration", {
-              position: toast.POSITION.TOP_RIGHT,
-            });
-          }
-        }
+      const response = await registerUser({
+        name,
+        email,
+        password,
+        c_password,
+      });
+      if (response?.status === 200) {
+        toast.success("Registration successful!", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+        toggleSignup(); // Switch to login after signup
       }
     } else {
-      try {
-        const { mobile, password } = user;
-        const response = await Axios.post("/users/login", {
-          mobile,
-          password,
+      const response = await loginUser({ email, password });
+      if (response?.status === 200) {
+        localStorage.setItem("dsquare_token", response.data.token.accessToken);
+        toast.success("Welcome Back!", {
+          position: toast.POSITION.TOP_RIGHT,
         });
-
-        if (response.status === 200) {
-          // Successful login, handle the token or redirect
-          const token = response.data.token;
-          // You can save the token in local storage or a cookie for future requests
-          if (token) {
-            localStorage.setItem("token", token);
-          }
-          // console.log("Logged in successfully, token:", token);
-          toast.success("Welcome Back User:)", {
-            position: toast.POSITION.TOP_RIGHT,
-          });
-
-          // navigate("/home");
-        } else {
-          const errorMessage = response.data.message; // Access the error message
-          toast.error(errorMessage, {
-            position: toast.POSITION.TOP_RIGHT,
-          });
-        }
-      } catch (error) {
-        // Check if the error is an Axios error with a response
-        if (error.response) {
-          const { status, data } = error.response;
-
-          if (status === 401 || status === 404) {
-            // Handle specific response status codes
-            const errorMessage = data.message;
-            toast.error(errorMessage, {
-              position: toast.POSITION.TOP_RIGHT,
-            });
-          } else {
-            // Other status codes, display a generic error message
-            toast.error("Error during login", {
-              position: toast.POSITION.TOP_RIGHT,
-            });
-          }
-        } else {
-          // Network error or other issues
-          console.error("Error during login:", error);
-          toast.error("Error during login", {
-            position: toast.POSITION.TOP_RIGHT,
-          });
-        }
+        // navigate("/home"); // Uncomment if using navigation
       }
     }
   };
 
   return (
-    <div className="h-screen  flex items-center justify-center flex-col">
-      {otpverifyshow ? (
-        <div className="items-center pt-10 lg:w-[540px] lg:min-h-[445px] sm:w-[540px] sm:min-h-[445px] flex flex-col gap-2 bg-custom-dark-purple shadow-custom p-5 rounded-3xl">
-          <h3 className="text-3xl text-white  ">
-            {signup ? "Create an Account" : "Sign In"}
-          </h3>
-          <p className="text-white text-xs mb-4">
-            {signup ? "Have an Account? " : "Don't have an account? "}
-            <label
-              className="text-custom-font-color-orange hover:cursor-pointer"
-              onClick={toggleSignup}
-            >
-              {signup ? "Sign in" : "Sign up"}
-            </label>
-          </p>
-          {!signup ? (
-            <>
-              {" "}
-              <form
-                action=""
-                onSubmit={handleSubmit}
-                className="gap-2 flex flex-col w-full pr-5 pl-5"
-              >
-                <div className="relative mb-3 inputfield">
-                  <p className="text-xs font-light mb-1 text-white">
-                    Mobile number
-                  </p>
-                  <input
-                    type="tel"
-                    name="mobile"
-                    pattern="\d{10}"
-                    maxLength={10}
-                    value={user.mobile}
-                    placeholder="Enter Mobile number"
-                    required
-                    onChange={handleInputChange}
-                    className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
-                  />
-                </div>
-                <div className="relative mb-2 inputfield">
-                  <p className="text-xs font-light mb-1 text-white">Password</p>
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Enter password"
-                    value={user.password}
-                    required
-                    onChange={handleInputChange}
-                    className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
-                  />
-                </div>
-                <div className="relative mb-2 flex">
-                  <input type="checkbox" className="" name="" id="" />
-                  <span className="ml-3 text-white text-xs font-light ">
-                    Keep me signed in
-                  </span>
-                </div>
-                <button
-                  className="px-6 py-2 text-sm rounded shadow h-[38px] bg-custom-font-color-orange hover:bg-rose-200  text-white"
-                  type="submit"
-                  role="button"
-                >
-                  Sign In
-                </button>
-              </form>
-              <p
-                className="text-custom-font-color-orange text-xs font-light flex justify-center mt-2 hover:cursor-pointer"
-                onClick={forgetPasswordShow}
-              >
-                Forget your password?
-              </p>
-            </>
-          ) : (
-            <>
-              <form
-                action=""
-                className="gap-2 flex flex-col w-full pr-5 pl-5"
-                onSubmit={handleSubmit}
-              >
-                <div className="relative mb-3 inputfield">
-                  <p className="text-xs font-light mb-1 text-white">Username</p>
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Enter user name"
-                    value={user.name}
-                    required
-                    onChange={handleInputChange}
-                    className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
-                  />
-                </div>
-                <div className="relative mb-3 inputfield">
-                  <p className="text-xs font-light mb-1 text-white">
-                    Mobile number
-                  </p>
-                  <input
-                    type="tel"
-                    pattern="\d{10}"
-                    maxLength={10}
-                    name="mobile"
-                    value={user.mobile}
-                    placeholder="Enter Mobile number"
-                    required
-                    onChange={handleInputChange}
-                    className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
-                  />
-                </div>
+    <div className="h-screen flex items-center justify-center flex-col">
+      <div className="items-center pt-10 lg:w-[540px] lg:min-h-[445px] sm:w-[540px] sm:min-h-[445px] flex flex-col gap-2 bg-custom-dark-purple shadow-custom p-5 rounded-3xl">
+        <h3 className="text-3xl text-white">
+          {signup ? "Create an Account" : "Sign In"}
+        </h3>
+        <p className="text-white text-xs mb-4">
+          {signup ? "Have an Account? " : "Don't have an account? "}
+          <label
+            className="text-custom-font-color-orange hover:cursor-pointer"
+            onClick={toggleSignup}
+          >
+            {signup ? "Sign in" : "Sign up"}
+          </label>
+        </p>
 
-                <div className="relative mb-3 inputfield">
-                  <p className="text-xs font-light mb-1 text-white">Password</p>
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Create password"
-                    value={user.password}
-                    required
-                    onChange={handleInputChange}
-                    className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
-                  />
-                </div>
-                <button
-                  className="px-6 py-2 text-sm rounded shadow h-[38px] bg-custom-font-color-orange hover:bg-rose-200  text-white"
-                  type="submit"
-                  role="button"
-                >
-                  Create Account
-                </button>
-              </form>
-              <div className=" flex flex-col items-center gap-1 mt-2">
-                <p className="text-white text-xs font-lighter">
-                  By creating account, you agree to our
-                </p>
-                <p className="text-xs font-lighter text-custom-font-color-orange">
-                  Terms of Service
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="  flex flex-col gap-6 bg-custom-dark-purple shadow-lg p-5 rounded-2xl">
-          <div
-            className="flex justify-end hover:text-custom-font-color-orange"
-            onClick={() => setotpverifyshow(!otpverifyshow)}
-          >
-            <FontAwesomeIcon icon={faTimesCircle} className="text-white" />
-          </div>
-          <h3 className="text-white">Enter the OTP:</h3>
-          <div className="flex space-x-2">
-            {otpFields.map((value, index) => (
+        <form
+          onSubmit={handleSubmit}
+          className="gap-2 flex flex-col w-full pr-5 pl-5"
+        >
+          {signup && (
+            <div className="relative mb-3 inputfield">
+              <p className="text-xs font-light mb-1 text-white">Username</p>
               <input
-                key={index}
                 type="text"
-                id={`otp_val_${index}`}
-                className="w-10 h-10 text-center bg-transparent border border-1 text-sm rounded-[4px] text-input-text-color"
-                maxLength={1}
-                min="0"
-                max="9"
-                value={value}
-                onChange={(e) => handleChange(index, e.target.value)}
-                onKeyDown={(e) => handleBackspace(index, e)}
+                name="name"
+                placeholder="Enter user name"
+                value={user.name}
+                required
+                onChange={handleInputChange}
+                className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
               />
-            ))}
+            </div>
+          )}
+          <div className="relative mb-3 inputfield">
+            <p className="text-xs font-light mb-1 text-white">Email</p>
+            <input
+              type="email"
+              name="email"
+              value={user.email}
+              placeholder="Enter email address"
+              required
+              onChange={handleInputChange}
+              className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
+            />
           </div>
+          <div className="relative mb-3 inputfield">
+            <p className="text-xs font-light mb-1 text-white">Password</p>
+            <input
+              type="password"
+              name="password"
+              placeholder={signup ? "Create password" : "Enter password"}
+              value={user.password}
+              required
+              onChange={handleInputChange}
+              className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
+            />
+          </div>
+
+          {signup && (
+            <div className="relative mb-3 inputfield">
+              <p className="text-xs font-light mb-1 text-white">
+                Confirm Password
+              </p>
+              <input
+                type="password"
+                name="c_password"
+                placeholder="Confirm password"
+                value={user.c_password}
+                required
+                onChange={handleInputChange}
+                className="input w-full bg-transparent border border-1 p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
+              />
+            </div>
+          )}
+
+          {!signup && (
+            <div className="relative mb-2 flex">
+              <input type="checkbox" />
+              <span className="ml-3 text-white text-xs font-light">
+                Keep me signed in
+              </span>
+            </div>
+          )}
+
           <button
-            className="px-6 py-2 text-sm rounded shadow bg-custom-font-color-orange h-[38px] hover:bg-rose-200 text-white"
-            onClick={handleotpvalidation}
+            className="px-6 py-2 text-sm rounded shadow h-[38px] bg-custom-font-color-orange hover:bg-rose-200 text-white"
+            type="submit"
           >
-            Verify Code
+            {signup ? "Create Account" : "Sign In"}
           </button>
-          <hr />
-          <p className="text-white text-xs mb-4">
-            Not received verification code ?
-            <label
-              className="text-custom-font-color-orange pl-1 hover:cursor-pointer"
-              onClick={toggleSignup}
-            >
-              Resend code
-            </label>
+        </form>
+
+        {!signup && (
+          <p
+            className="text-custom-font-color-orange text-xs font-light flex justify-center mt-2 hover:cursor-pointer"
+            onClick={forgetPasswordShow}
+          >
+            Forget your password?
           </p>
-        </div>
-      )}
+        )}
+
+        {signup && (
+          <div className="flex flex-col items-center gap-1 mt-2">
+            <p className="text-white text-xs font-lighter">
+              By creating an account, you agree to our
+            </p>
+            <p className="text-xs font-lighter text-custom-font-color-orange">
+              Terms of Service
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -9,6 +9,9 @@ import {
   faHotel,
   faPercent,
   faBell,
+  faMoneyBill,
+  faReceipt,
+  faSquarePlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { NavLink } from "react-router-dom";
 
@@ -33,7 +36,7 @@ const Sidebar = () => {
           />
         </div>
 
-        {["home", "analytics", "offers", "logout"].map((menu, index) => (
+        {["home", "analytics", "dish", "logout"].map((menu, index) => (
           <div
             key={index}
             className={`${
@@ -46,11 +49,11 @@ const Sidebar = () => {
               <FontAwesomeIcon
                 icon={
                   menu === "home"
-                    ? faHouse
+                    ? faReceipt
                     : menu === "analytics"
                     ? faChartBar
-                    : menu === "offers"
-                    ? faPercent
+                    : menu === "dish"
+                    ? faSquarePlus
                     : faArrowRightFromBracket
                 }
                 className={`${
@@ -78,11 +81,11 @@ const Sidebar = () => {
             <FontAwesomeIcon
               icon={
                 menu === "home"
-                  ? faHouse
+                  ? faReceipt
                   : menu === "analytics"
                   ? faChartBar
-                  : menu === "offers"
-                  ? faPercent
+                  : menu === "dish"
+                  ? faSquarePlus
                   : faArrowRightFromBracket
               }
               className="text-lg"
