@@ -1,97 +1,124 @@
-import React, { useState } from "react";
+import { React, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRightFromBracket,
   faChartBar,
-  faEnvelope,
-  faGear,
-  faHouse,
-  faHotel,
-  faPercent,
-  faBell,
-  faMoneyBill,
   faReceipt,
   faSquarePlus,
 } from "@fortawesome/free-solid-svg-icons";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import { logout } from "../api/Signin";
+import { toast } from "react-toastify";
+import { UserContext } from "../context/UserContext";
 
 const Sidebar = () => {
-  const [activeMenu, setActiveMenu] = useState("home");
+  const location = useLocation();
+  const currentPath = location.pathname; // Get the current route
 
-  const handleMenuClick = (menu) => {
-    setActiveMenu(menu);
+  const menuItems = [
+    { name: "home", icon: faReceipt },
+    { name: "analytics", icon: faChartBar },
+    { name: "dish", icon: faSquarePlus },
+    { name: "logout", icon: faArrowRightFromBracket },
+  ];
+  const { logout } = useContext(UserContext);
+  const logoutUser = async () => {
+    const response = await logout();
+    if (response?.status === 200) {
+      logout();
+      toast.success("Logged out successfully!", {
+        position: "top-right",
+      });
+    }
   };
-
-  const iconClasses = "text-xl";
-  const activeIconColor = "text-white";
 
   return (
     <>
       {/* Sidebar for large screens */}
-      <div className="hidden md:flex md:flex-col md:w-20 min-h-screen p-2  items-center justify-evenly bg-custom-dark-purple">
-        <div className="bg-logo-outer-color  p-2 rounded-md">
+      <div className="hidden md:flex md:flex-col md:w-20  p-2 items-center justify-evenly bg-custom-dark-purple">
+        <div className="bg-logo-outer-color p-2 rounded-md">
           <FontAwesomeIcon
-            icon={faHotel}
+            icon={faReceipt}
             className="text-gradient-custom w-8 h-8"
           />
         </div>
 
-        {["home", "analytics", "dish", "logout"].map((menu, index) => (
-          <div
-            key={index}
-            className={`${
-              activeMenu === menu
-                ? "shadow-highlight-icon bg-highlight-bg-icon text-white"
-                : ""
-            } w-full text-icon-color p-4 text-center cursor-pointer rounded-md transition-colors duration-200`}
-          >
-            <NavLink to={`/${menu}`} onClick={() => handleMenuClick(menu)}>
+        {menuItems.map(({ name, icon }, index) =>
+          name != "logout" ? (
+            <NavLink
+              key={index}
+              to={`/${name}`}
+              className={`w-full p-4 text-center cursor-pointer rounded-md transition-colors duration-200 
+              ${
+                currentPath === `/${name}`
+                  ? "bg-highlight-bg-icon text-white"
+                  : "text-icon-color"
+              }`}
+            >
               <FontAwesomeIcon
-                icon={
-                  menu === "home"
-                    ? faReceipt
-                    : menu === "analytics"
-                    ? faChartBar
-                    : menu === "dish"
-                    ? faSquarePlus
-                    : faArrowRightFromBracket
-                }
-                className={`${
-                  activeMenu === menu ? activeIconColor : "text-gradient-custom"
-                } ${iconClasses}`}
+                icon={icon}
+                className={`text-xl ${
+                  currentPath === `/${name}`
+                    ? "text-white"
+                    : "text-gradient-custom"
+                }`}
               />
             </NavLink>
-          </div>
-        ))}
+          ) : (
+            <div
+              key={index}
+              onClick={logoutUser}
+              className={`w-full p-4 text-center cursor-pointer rounded-md transition-colors duration-200 
+              ${
+                currentPath === `/${name}`
+                  ? "bg-highlight-bg-icon text-white"
+                  : "text-icon-color"
+              }`}
+            >
+              <FontAwesomeIcon
+                icon={icon}
+                className={`text-xl ${
+                  currentPath === `/${name}`
+                    ? "text-white"
+                    : "text-gradient-custom"
+                }`}
+              />
+            </div>
+          )
+        )}
       </div>
 
       {/* Bottom Navbar for small screens */}
       <div className="fixed bottom-0 left-0 z-10 right-0 bg-custom-dark-purple p-2 flex justify-around items-center md:hidden shadow-lg">
-        {["home", "analytics", "offers", "logout"].map((menu, index) => (
-          <NavLink
-            key={index}
-            to={`/${menu}`}
-            className={`p-2 rounded-md transition-all duration-300 ${
-              activeMenu === menu
-                ? "bg-highlight-bg-icon text-white"
-                : "text-gradient-custom"
-            }`}
-            onClick={() => handleMenuClick(menu)}
-          >
-            <FontAwesomeIcon
-              icon={
-                menu === "home"
-                  ? faReceipt
-                  : menu === "analytics"
-                  ? faChartBar
-                  : menu === "dish"
-                  ? faSquarePlus
-                  : faArrowRightFromBracket
-              }
-              className="text-lg"
-            />
-          </NavLink>
-        ))}
+        {menuItems.map(({ name, icon }, index) =>
+          name != "logout" ? (
+            <NavLink
+              key={index}
+              to={`/${name}`}
+              className={`p-2 rounded-md transition-all duration-300 
+              ${
+                currentPath === `/${name}`
+                  ? "bg-highlight-bg-icon text-white"
+                  : "text-icon-color"
+              }`}
+            >
+              <FontAwesomeIcon icon={icon} className="text-lg" />
+            </NavLink>
+          ) : (
+            <div
+              key={index}
+              onClick={logoutUser}
+              className={`p-2 rounded-md transition-all duration-300 
+              ${
+                currentPath === `/${name}`
+                  ? "bg-highlight-bg-icon text-white"
+                  : "text-custom-font-color-orange"
+              }`}
+            >
+              <FontAwesomeIcon icon={icon} className="text-lg" />
+            </div>
+          )
+        )}
       </div>
     </>
   );

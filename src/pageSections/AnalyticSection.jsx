@@ -8,7 +8,7 @@ import OrderReport from "../components/OrderReport";
 const AnalyticSection = () => {
   return (
     <div>
-      <div className="flex p-4 flex-col lg:flex-row gap-4">
+      <div className="flex max-h-screen  overflow-y-auto  p-4 flex-col lg:flex-row gap-4">
         <div className="p-2 space-y-4 w-full lg:w-3/4">
           <Title />
           <Cards />

@@ -10,7 +10,7 @@ const Order = () => {
       <Sidebar />
 
       {/* Dynamic content area */}
-      <div className="flex-grow p-4">
+      <div className="flex-grow">
         <OrderSection />
       </div>
     </div>

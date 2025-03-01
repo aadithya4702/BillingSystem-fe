@@ -1,108 +1,190 @@
-import { React, useState } from "react";
+import { useState, useEffect } from "react";
+import { addDish, getDishes, updateDish } from "../api/Dishes";
+import { addCategory, getCategories } from "../api/Categories";
 
 const AddDishSection = () => {
-  const dishesData = [
-    {
-      id: 1,
-      name: "Spicy seasoned seafood noodles",
-      price: "$2.29",
-      quantity: "20 Bowls",
-      image: "https://via.placeholder.com/100",
-    },
-    {
-      id: 2,
-      name: "Salted Pasta with mushroom sauce",
-      price: "$2.69",
-      quantity: "30 Bowls",
-      image:
-        "https://media.istockphoto.com/id/1084423556/photo/vegetarian-lentil-salad-with-fried-cheese-greens-and-fresh-vegeables.webp?s=2048x2048&w=is&k=20&c=DMyoDUM_t_ZY_uTDySkZNA1497m7YUlzPNZLUaOMIes=",
-    },
-  ];
-
-  const categoriesData = ["Veg", "Non-Veg"];
-
-  const [dishes, setDishes] = useState(dishesData);
+  const [dishes, setDishes] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
-  const [categories, setCategories] = useState(categoriesData);
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [isDishModalOpen, setIsDishModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editDishId, setEditDishId] = useState(null);
   const [newDish, setNewDish] = useState({
     name: "",
+    description: "",
     price: "",
-    quantity: "",
+    is_available: false,
+    category_id: "",
     image: "",
   });
 
+  // Fetch dishes and categories on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedDishes = await getDishes();
+        const response = await getCategories();
+
+        if (response.success && Array.isArray(response.data)) {
+          setCategories(response.data); // Set categories correctly
+          if (response.data.length > 0) {
+            setSelectedCategory(response.data[0].id); // Set first category as default
+          }
+        }
+        if (fetchedDishes.success && Array.isArray(fetchedDishes.data)) {
+          setDishes(fetchedDishes.data); // Set categories correctly
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const handleOpenAddModal = () => {
     setIsEditing(false);
-    setNewDish({ name: "", price: "", quantity: "", image: "" });
+
+    setNewDish({
+      name: "",
+      description: "",
+      price: "",
+      is_available: false,
+      image: "",
+      category_id: selectedCategory || "",
+    });
     setIsDishModalOpen(true);
   };
 
   const handleOpenEditModal = (dish) => {
     setIsEditing(true);
     setEditDishId(dish.id);
-    setNewDish(dish);
+    setNewDish({
+      ...dish,
+      is_available: Boolean(dish.is_available), // Ensure boolean value
+    });
     setIsDishModalOpen(true);
   };
 
-  const addCategory = () => {
-    if (newCategory) {
-      setCategories([...categories, newCategory]);
-      setIsCategoryModalOpen(false);
-      setNewCategory("");
+  const handleSaveDish = async () => {
+    console.log("handle dish called", newDish);
+
+    if (
+      !newDish.name ||
+      !newDish.description ||
+      !newDish.price ||
+      newDish.is_available === undefined ||
+      !newDish.category_id
+    ) {
+      return;
+    }
+
+    try {
+      const truckData = localStorage.getItem("dsquare_valid_truck"); // Get truck data
+      if (!truckData) {
+        throw new Error("No truck data found. Please log in again.");
+      }
+
+      const truck = JSON.parse(truckData); // Parse the string
+
+      if (!truck.id) {
+        throw new Error("Invalid truck data. Please log in again.");
+      }
+
+      const dishPayload = {
+        ...newDish,
+        truck_id: truck.id, // Add truck_id here
+      };
+
+      let updatedDishes;
+      console.log("inside loop");
+      if (isEditing) {
+        const updatedDish = await updateDish(editDishId, dishPayload);
+        updatedDishes = dishes.map((dish) =>
+          dish.id === editDishId ? updatedDish : dish
+        );
+      } else {
+        const addedDish = await addDish(dishPayload);
+        updatedDishes = [...dishes, addedDish];
+      }
+
+      setDishes(updatedDishes);
+      setIsDishModalOpen(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error saving dish:", error);
     }
   };
 
-  const handleSaveDish = () => {
-    if (!newDish.name || !newDish.price || !newDish.quantity) return;
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) return; // Prevent empty categories
 
-    if (isEditing) {
-      setDishes(
-        dishes.map((dish) => (dish.id === editDishId ? { ...newDish } : dish))
-      );
-    } else {
-      setDishes([...dishes, { id: dishes.length + 1, ...newDish }]);
+    try {
+      // Retrieve truck details correctly
+      const truckData = localStorage.getItem("dsquare_valid_truck");
+      if (!truckData) {
+        throw new Error("No truck data found. Please log in again.");
+      }
+
+      const truck = JSON.parse(truckData); // Parse the string
+      if (!truck.id) {
+        throw new Error("Invalid truck data. Please log in again.");
+      }
+
+      // Call API to add category
+      const addedCategory = await addCategory({
+        name: newCategory,
+        truck_id: truck.id, // Ensure correct truck_id
+      });
+      const categoryId = addedCategory?.id || addedCategory?.data?.id || null;
+      if (categoryId) {
+        setCategories([...categories, addedCategory]); // Update UI
+        setSelectedCategory(addedCategory.id);
+        window.location.reload();
+      } else {
+        throw new Error("Failed to add category. Invalid response from API.");
+      }
+
+      setNewCategory(""); // Reset input
+      setIsCategoryModalOpen(false); // Close modal
+    } catch (error) {
+      console.error("Error adding category:", error);
     }
-
-    setIsDishModalOpen(false);
-    setNewDish({ name: "", price: "", quantity: "", image: "" });
   };
 
   return (
-    <div className="min-h-screen  bg-gray-900 text-white p-4 md:p-6">
+    <div className="h-full overflow-y-auto custom-scrollbar bg-gray-900 text-white p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6 ">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Products Management</h2>
         </div>
 
         {/* Categories */}
         <div className="flex flex-wrap gap-2 mb-4">
           <button
-            className="bg-transparent border-2 border-custom-font-color-orange px-4 py-2 rounded"
+            className="bg-transparent border-2 border-orange-500 px-4 py-2 rounded"
             onClick={() => setIsCategoryModalOpen(true)}
           >
             Manage Categories
           </button>
           {categories.map((category) => (
             <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded ${
-                selectedCategory === category
-                  ? "bg-highlight-bg-icon"
+                selectedCategory === category.id
+                  ? "bg-orange-500"
                   : "bg-gray-700"
               }`}
             >
-              {category}
+              {category.name}
             </button>
           ))}
         </div>
-        <hr className="m-5 border-1 border-input-text-color " />
+
+        <hr className="m-5 border-gray-700" />
 
         {/* Dish List */}
         <div className="grid mb-20 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
@@ -121,11 +203,12 @@ const AddDishSection = () => {
               />
               <h3 className="text-lg font-semibold">{dish.name}</h3>
               <p className="text-gray-400">
-                {dish.price} • {dish.quantity}
+                {dish.price} •{" "}
+                {dish.is_available ? "Available" : "Not available"}
               </p>
               <button
                 onClick={() => handleOpenEditModal(dish)}
-                className="mt-2 w-full bg-logo-outer-color px-4 py-2 rounded"
+                className="mt-2 w-full bg-highlight-bg-icon px-4 py-2 rounded"
               >
                 Edit Dish
               </button>
@@ -150,6 +233,15 @@ const AddDishSection = () => {
             />
             <input
               type="text"
+              placeholder="Dish Description"
+              value={newDish.description}
+              onChange={(e) =>
+                setNewDish({ ...newDish, description: e.target.value })
+              }
+              className="w-full p-2 mb-2 bg-gray-700 rounded"
+            />
+            <input
+              type="text"
               placeholder="Price"
               value={newDish.price}
               onChange={(e) =>
@@ -157,15 +249,20 @@ const AddDishSection = () => {
               }
               className="w-full p-2 mb-2 bg-gray-700 rounded"
             />
-            <input
-              type="text"
-              placeholder="Quantity"
-              value={newDish.quantity}
+            <select
+              value={newDish.is_available.toString()} // Convert boolean to string for the dropdown
               onChange={(e) =>
-                setNewDish({ ...newDish, quantity: e.target.value })
+                setNewDish({
+                  ...newDish,
+                  is_available: e.target.value === "true",
+                })
               }
               className="w-full p-2 mb-2 bg-gray-700 rounded"
-            />
+            >
+              <option value="true">Available</option>
+              <option value="false">Not Available</option>
+            </select>
+
             <input
               type="text"
               placeholder="Image URL"
@@ -175,6 +272,21 @@ const AddDishSection = () => {
               }
               className="w-full p-2 mb-4 bg-gray-700 rounded"
             />
+
+            <select
+              value={newDish.category_id}
+              onChange={(e) =>
+                setNewDish({ ...newDish, category_id: e.target.value })
+              }
+              className="w-full p-2 mb-4 bg-gray-700 rounded"
+            >
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+
             <div className="flex justify-between">
               <button
                 onClick={() => setIsDishModalOpen(false)}
@@ -213,7 +325,7 @@ const AddDishSection = () => {
                 Cancel
               </button>
               <button
-                onClick={addCategory}
+                onClick={handleAddCategory}
                 className="px-4 py-2 bg-green-500 rounded"
               >
                 Add

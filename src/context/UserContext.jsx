@@ -6,7 +6,7 @@ export const UserContext = createContext();
 
 export function UserContextProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("dsquare_valid_user");
+    const storedUser = localStorage.getItem("dsquare_valid_truck");
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
@@ -15,15 +15,15 @@ export function UserContextProvider({ children }) {
 
     if (storedToken && !user) {
       axios
-        .get("http://65.0.176.95/api/account", {
+        .get("http://localhost:8000/api/trucks", {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },
         })
         .then(({ data }) => {
-          setUser(data);
+          setUser(data.data[0]);
 
-          localStorage.setItem("dsquare_valid_user", JSON.stringify(data));
+          localStorage.setItem("dsquare_valid_truck", JSON.stringify(data));
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
@@ -33,7 +33,7 @@ export function UserContextProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem("dsquare_token");
-    localStorage.removeItem("dsquare_valid_user");
+    localStorage.removeItem("dsquare_valid_truck");
 
     Cookies.remove("dsquare_token");
 

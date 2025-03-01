@@ -10,7 +10,7 @@ const AddDish = () => {
         <Sidebar />
 
         {/* Dynamic content area */}
-        <div className="flex-grow p-4">
+        <div className="flex-grow h-screen">
           <AddDishSection />{" "}
           {/* Renders the child routes (Order, AddDish, etc.) */}
         </div>
