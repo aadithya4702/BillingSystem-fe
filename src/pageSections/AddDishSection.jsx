@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { addDish, getDishes, updateDish } from "../api/Dishes";
 import { addCategory, getCategories } from "../api/Categories";
+import { toast } from "react-toastify";
 
 const AddDishSection = () => {
   const [dishes, setDishes] = useState([]);
@@ -71,13 +72,24 @@ const AddDishSection = () => {
   const handleSaveDish = async () => {
     console.log("handle dish called", newDish);
 
-    if (
-      !newDish.name ||
-      !newDish.description ||
-      !newDish.price ||
-      newDish.is_available === undefined ||
-      !newDish.category_id
-    ) {
+    if (!newDish.name) {
+      toast.error("Dish name is required!");
+      return;
+    }
+    if (!newDish.description) {
+      toast.error("Dish description is required!");
+      return;
+    }
+    if (!newDish.price) {
+      toast.error("Dish price is required!");
+      return;
+    }
+    if (newDish.is_available === undefined) {
+      toast.error("Dish availability is required!");
+      return;
+    }
+    if (!newDish.category_id) {
+      toast.error("Dish category is required!");
       return;
     }
 
@@ -240,15 +252,20 @@ const AddDishSection = () => {
               }
               className="w-full p-2 mb-2 bg-gray-700 rounded"
             />
-            <input
-              type="text"
-              placeholder="Price"
-              value={newDish.price}
-              onChange={(e) =>
-                setNewDish({ ...newDish, price: e.target.value })
-              }
-              className="w-full p-2 mb-2 bg-gray-700 rounded"
-            />
+            <div className="flex w-full mb-2 ">
+              <span className="bg-input-text-color w-10 flex justify-center items-center text-xl rounded-l">
+                ₹
+              </span>
+              <input
+                type="text"
+                placeholder="Price"
+                value={newDish.price}
+                onChange={(e) =>
+                  setNewDish({ ...newDish, price: e.target.value })
+                }
+                className="w-full p-2  bg-gray-700 rounded-r"
+              />
+            </div>
             <select
               value={newDish.is_available.toString()} // Convert boolean to string for the dropdown
               onChange={(e) =>

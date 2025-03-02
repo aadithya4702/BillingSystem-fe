@@ -13,6 +13,7 @@ const OrderSection = () => {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState([]);
+  const [selectedPayment, setSelectedPayment] = useState("cash");
   const [showCart, setShowCart] = useState(true);
   const categoriesData = [
     "Veg",
@@ -71,10 +72,16 @@ const OrderSection = () => {
         throw new Error("Invalid truck data. Please log in again.");
       }
 
+      if (selectedPayment == "") {
+        toast.error("Select payment to checkout");
+        return;
+      }
+
       const formattedOrder = {
-        customer_number: "9876543210",
+        customer_number: "1235",
         status: "completed",
         truck_id: truck.id,
+        payment_type: selectedPayment,
         orders: cart.map((item) => ({
           food_id: item.id,
           quantity: item.qty,
@@ -85,9 +92,9 @@ const OrderSection = () => {
 
       const response = await placeOrder(formattedOrder);
 
-      if (response) {
+      if (response.success) {
         toast.success("Order created");
-        console.log(response);
+
         const bill = await generateBill(response.data[0].id);
         if (bill) {
           printBillDirectly(bill);
@@ -97,11 +104,16 @@ const OrderSection = () => {
 
         setCart([]); // Clear cart after successful order
       } else {
+        toast.error("Order failed");
         throw new Error("Failed to submit order");
       }
     } catch (err) {
       console.error("Error submitting order:", err);
     }
+  };
+
+  const handlePaymentChange = (e) => {
+    setSelectedPayment(e.target.id); // This will update the state with the selected payment method
   };
 
   const printBillDirectly = (blob) => {
@@ -198,14 +210,14 @@ const OrderSection = () => {
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="rounded-full object-cover h-[120px] w-[120px] border-4 border-gray-800 shadow-md"
+                    className="rounded-full object-cover h-[120px] w-[120px] bg-black border-4 border-gray-800 shadow-md"
                   />
                 </div>
                 <h2 className="text-lg font-semibold text-white text-center mt-8">
                   {product.name}
                 </h2>
                 <p className="text-gray-400 font-medium mt-1 text-center">
-                  ${product.price.toFixed(2)}
+                  ₹ {product.price.toFixed(2)}
                 </p>
                 <div className="flex justify-center">
                   <p
@@ -218,16 +230,22 @@ const OrderSection = () => {
 
                 {/* Cart Controls */}
                 <div className="mt-4">
-                  {cartItem ? (
+                  {cartItem && cartItem.qty > 0 ? (
                     <div className="flex items-center justify-between">
                       {/* Quantity Selector */}
                       <div className="flex items-center justify-between border-2 border-red-400 p-2 rounded-lg w-3/4">
                         {/* Decrease Quantity */}
                         <button
                           className="bg-red-500 hover:bg-red-500 text-white px-3 py-1 rounded-lg"
-                          onClick={() =>
-                            updateQty(product.id, Math.max(cartItem.qty - 1, 1))
-                          }
+                          onClick={() => {
+                            const newQty = Math.max(cartItem.qty - 1, 0);
+                            if (newQty === 0) {
+                              // Remove item from cart if quantity is 0
+                              removeFromCart(product.id);
+                            } else {
+                              updateQty(product.id, newQty);
+                            }
+                          }}
                         >
                           -
                         </button>
@@ -262,7 +280,7 @@ const OrderSection = () => {
                       onClick={() => addToCart(product)}
                       disabled={!product.is_available}
                     >
-                      Add to Cart
+                      {product.is_available ? "Add to cart" : "Not Available"}
                     </button>
                   )}
                 </div>
@@ -309,7 +327,7 @@ const OrderSection = () => {
                 <div>
                   <h3 className="text-sm font-semibold">{item.name}</h3>
                   <p className="text-xs text-gray-400">
-                    ${item.price.toFixed(2)} x {item.qty}
+                    ₹{item.price.toFixed(2)} x {item.qty}
                   </p>
                 </div>
                 <div className="flex items-center">
@@ -336,9 +354,8 @@ const OrderSection = () => {
           )}
         </div>
 
-        {/* Payment Options */}
         {showCart && cart.length > 0 && (
-          <div className="mt-4 p-3  rounded-lg">
+          <div className="mt-4 p-3 rounded-lg">
             <h3 className="text-white text-sm font-semibold mb-2">
               Payment Method
             </h3>
@@ -352,7 +369,13 @@ const OrderSection = () => {
                   key={method.id}
                   className="flex items-center gap-2 text-white text-sm bg-gray-600 px-3 py-2 rounded-lg cursor-pointer"
                 >
-                  <input type="radio" name="payment" id={method.id} />
+                  <input
+                    type="radio"
+                    name="payment"
+                    id={method.id}
+                    checked={selectedPayment === method.id} // Check if this payment is selected
+                    onChange={handlePaymentChange} // Update the state on selection change
+                  />
                   {method.label}
                 </label>
               ))}
@@ -364,7 +387,7 @@ const OrderSection = () => {
         {showCart && cart.length > 0 && (
           <div className="mt-4 border-t border-gray-700 pt-4">
             <p className="text-lg font-semibold text-white">
-              Subtotal: ${subtotal}
+              Subtotal: ₹{subtotal}
             </p>
             <button
               onClick={orderSubmit}

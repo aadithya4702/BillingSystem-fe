@@ -11,6 +11,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { logout } from "../api/Signin";
 import { toast } from "react-toastify";
 import { UserContext } from "../context/UserContext";
+import { faBookBookmark } from "@fortawesome/free-solid-svg-icons/faBookBookmark";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -18,7 +19,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: "home", icon: faReceipt },
-    { name: "orders", icon: faBookmark },
+    { name: "orders", icon: faBookBookmark },
     { name: "analytics", icon: faChartBar },
     { name: "dish", icon: faSquarePlus },
     { name: "logout", icon: faArrowRightFromBracket },
