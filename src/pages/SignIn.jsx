@@ -94,7 +94,7 @@ const Signin = () => {
 
   return (
     <div className="h-screen flex items-center justify-center flex-col">
-      <div className="items-center pt-10 w-[540px] min-h-[445px] flex flex-col gap-2 bg-custom-dark-purple shadow-custom p-5 rounded-3xl">
+      <div className="items-center pt-10 md:w-[540px] min-h-[445px] flex flex-col gap-2 bg-custom-dark-purple shadow-custom p-5 rounded-3xl">
         <h3 className="text-3xl text-white">
           {signup ? "Create an Account" : "Sign In"}
         </h3>

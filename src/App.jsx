@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import { toast, ToastContainer } from "react-toastify";
 import { UserContextProvider } from "./context/UserContext";
 import AuthGuard from "./context/AuthGuard";
+import OrdersList from "./pages/OrdersList";
 
 function App() {
   return (
@@ -38,6 +39,11 @@ function App() {
           <Route
             path="/home"
             element={<PrivateRoute component={<Order />} />}
+          />
+
+          <Route
+            path="/orders"
+            element={<PrivateRoute component={<OrdersList />} />}
           />
           <Route
             path="/dish"

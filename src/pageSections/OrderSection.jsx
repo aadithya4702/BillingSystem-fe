@@ -4,6 +4,7 @@ import React from "react";
 import { getDishes } from "../api/Dishes";
 import { placeOrder } from "../api/Order";
 import { toast } from "react-toastify";
+import { generateBill } from "../api/Bill";
 
 const OrderSection = () => {
   const [isExpanded, setIsExpanded] = useState(false); // Toggle state
@@ -58,19 +59,20 @@ const OrderSection = () => {
 
   const orderSubmit = async () => {
     try {
-      const truckData = localStorage.getItem("dsquare_valid_truck"); // Get truck data
+      const truckData = localStorage.getItem("dsquare_valid_truck");
+
       if (!truckData) {
         throw new Error("No truck data found. Please log in again.");
       }
 
-      const truck = JSON.parse(truckData); // Parse the string
+      const truck = JSON.parse(truckData);
 
       if (!truck.id) {
         throw new Error("Invalid truck data. Please log in again.");
       }
 
       const formattedOrder = {
-        customer_number: "9876543210", // Replace this with the actual customer number
+        customer_number: "9876543210",
         status: "completed",
         truck_id: truck.id,
         orders: cart.map((item) => ({
@@ -81,20 +83,39 @@ const OrderSection = () => {
         })),
       };
 
-      console.log("Final Order Data:", formattedOrder);
-
-      // Send the data to the backend
       const response = await placeOrder(formattedOrder);
 
       if (response) {
         toast.success("Order created");
-        setCart([]);
+        console.log(response);
+        const bill = await generateBill(response.data[0].id);
+        if (bill) {
+          printBillDirectly(bill);
+        } else {
+          throw new Error("Error generating bill");
+        }
+
+        setCart([]); // Clear cart after successful order
       } else {
         throw new Error("Failed to submit order");
       }
     } catch (err) {
       console.error("Error submitting order:", err);
     }
+  };
+
+  const printBillDirectly = (blob) => {
+    const url = URL.createObjectURL(blob);
+    const iframe = document.createElement("iframe");
+
+    iframe.style.display = "none";
+    iframe.src = url;
+
+    document.body.appendChild(iframe);
+
+    iframe.onload = () => {
+      iframe.contentWindow.print(); // Trigger print
+    };
   };
 
   const addToCart = (product) => {

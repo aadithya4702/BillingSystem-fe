@@ -2,6 +2,7 @@ import { React, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRightFromBracket,
+  faBookmark,
   faChartBar,
   faReceipt,
   faSquarePlus,
@@ -17,6 +18,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: "home", icon: faReceipt },
+    { name: "orders", icon: faBookmark },
     { name: "analytics", icon: faChartBar },
     { name: "dish", icon: faSquarePlus },
     { name: "logout", icon: faArrowRightFromBracket },
