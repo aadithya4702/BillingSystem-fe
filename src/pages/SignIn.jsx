@@ -60,6 +60,7 @@ const Signin = () => {
     } else {
       try {
         const loginResponse = await loginUser({ email, password });
+        console.log(loginResponse);
 
         if (loginResponse?.status === 200) {
           localStorage.setItem(
@@ -93,12 +94,12 @@ const Signin = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center flex-col">
-      <div className="items-center pt-10 md:w-[540px] min-h-[445px] flex flex-col gap-2 bg-custom-dark-purple shadow-custom p-5 rounded-3xl">
-        <h3 className="text-3xl text-white">
+    <div className="h-screen flex items-center justify-center flex-col px-4">
+      <div className="w-full max-w-lg transition-all duration-300 ease-in-out min-h-[400px] flex flex-col gap-4 md:bg-custom-dark-purple md:shadow-custom p-6 rounded-2xl ">
+        <h3 className="md:text-3xl text-2xl text-white text-center">
           {signup ? "Create an Account" : "Sign In"}
         </h3>
-        <p className="text-white text-xs mb-4">
+        <p className="text-white text-xs mb-4 text-center">
           {signup ? "Have an Account? " : "Don't have an account? "}
           <label
             className="text-custom-font-color-orange cursor-pointer"
