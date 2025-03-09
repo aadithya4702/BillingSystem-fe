@@ -1,6 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { createContext, useEffect, useState } from "react";
+import api from "../api/axiosInstance";
 
 export const UserContext = createContext();
 
@@ -14,8 +15,8 @@ export function UserContextProvider({ children }) {
     const storedToken = localStorage.getItem("dsquare_token");
 
     if (storedToken && !user) {
-      axios
-        .get("http://localhost:8000/api/trucks", {
+      api
+        .get("/trucks", {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },

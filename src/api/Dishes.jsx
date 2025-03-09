@@ -29,3 +29,13 @@ export const updateDish = async (id, dishData) => {
     return null;
   }
 };
+
+export const deleteDish = async (id) => {
+  try {
+    const response = await api.delete(`/food-items/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting dish:", error);
+    return null;
+  }
+};

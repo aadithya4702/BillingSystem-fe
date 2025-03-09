@@ -63,11 +63,11 @@ const handleError = (error) => {
   if (error.response) {
     const { data } = error.response;
     toast.error(data.message || "An error occurred", {
-      position: toast.POSITION.TOP_RIGHT,
+      position: "top-right",
     });
   } else {
     toast.error("Network error. Please try again later.", {
-      position: toast.POSITION.TOP_RIGHT,
+      position: "top-right",
     });
   }
 };

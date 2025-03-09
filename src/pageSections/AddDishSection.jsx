@@ -1,7 +1,16 @@
 import { useState, useEffect } from "react";
-import { addDish, getDishes, updateDish } from "../api/Dishes";
+import { addDish, deleteDish, getDishes, updateDish } from "../api/Dishes";
 import { addCategory, getCategories } from "../api/Categories";
 import { toast } from "react-toastify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faWallet,
+  faMoneyBillTransfer,
+  faCreditCard,
+  faEdit,
+  faClose,
+  faTimesCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 const AddDishSection = () => {
   const [dishes, setDishes] = useState([]);
@@ -10,6 +19,8 @@ const AddDishSection = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isDishModalOpen, setIsDishModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isDeleteOpenModel, setIsDeleteOpenModel] = useState(false);
+  const [selectedItemForDelete, setSelectedItemForDelete] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [editDishId, setEditDishId] = useState(null);
   const [newDish, setNewDish] = useState({
@@ -21,29 +32,45 @@ const AddDishSection = () => {
     image: "",
   });
 
-  // Fetch dishes and categories on mount
+  // Fetch data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedDishes = await getDishes();
-        const response = await getCategories();
+        const [dishesResponse, categoriesResponse] = await Promise.all([
+          getDishes(),
+          getCategories(),
+        ]);
 
-        if (response.success && Array.isArray(response.data)) {
-          setCategories(response.data); // Set categories correctly
-          if (response.data.length > 0) {
-            setSelectedCategory(response.data[0].id); // Set first category as default
-          }
+        if (dishesResponse.success && Array.isArray(dishesResponse.data)) {
+          setDishes(dishesResponse.data);
+        } else {
+          toast.error("Failed to fetch dishes.");
         }
-        if (fetchedDishes.success && Array.isArray(fetchedDishes.data)) {
-          setDishes(fetchedDishes.data); // Set categories correctly
+
+        if (
+          categoriesResponse.success &&
+          Array.isArray(categoriesResponse.data)
+        ) {
+          setCategories(categoriesResponse.data);
+          if (categoriesResponse.data.length > 0) {
+            setSelectedCategory(categoriesResponse.data[0].id);
+          }
+        } else {
+          toast.error("Failed to fetch categories.");
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+        toast.error("An error occurred while fetching data.");
       }
     };
 
     fetchData();
   }, []);
+
+  const deleteModel = (id) => {
+    setSelectedItemForDelete(id);
+    setIsDeleteOpenModel(!isDeleteOpenModel);
+  };
 
   const handleOpenAddModal = () => {
     setIsEditing(false);
@@ -70,99 +97,108 @@ const AddDishSection = () => {
   };
 
   const handleSaveDish = async () => {
-    console.log("handle dish called", newDish);
-
-    if (!newDish.name) {
-      toast.error("Dish name is required!");
-      return;
-    }
-    if (!newDish.description) {
-      toast.error("Dish description is required!");
-      return;
-    }
-    if (!newDish.price) {
-      toast.error("Dish price is required!");
-      return;
-    }
-    if (newDish.is_available === undefined) {
-      toast.error("Dish availability is required!");
-      return;
-    }
-    if (!newDish.category_id) {
-      toast.error("Dish category is required!");
+    if (
+      !newDish.name ||
+      !newDish.description ||
+      !newDish.price ||
+      !newDish.category_id
+    ) {
+      toast.error("All fields are required.");
       return;
     }
 
     try {
-      const truckData = localStorage.getItem("dsquare_valid_truck"); // Get truck data
-      if (!truckData) {
+      const truckData = localStorage.getItem("dsquare_valid_truck");
+      if (!truckData)
         throw new Error("No truck data found. Please log in again.");
-      }
 
-      const truck = JSON.parse(truckData); // Parse the string
-
-      if (!truck.id) {
+      const truck = JSON.parse(truckData);
+      if (!truck.id)
         throw new Error("Invalid truck data. Please log in again.");
-      }
 
-      const dishPayload = {
-        ...newDish,
-        truck_id: truck.id, // Add truck_id here
-      };
+      const dishPayload = { ...newDish, truck_id: truck.id };
 
       let updatedDishes;
-      console.log("inside loop");
       if (isEditing) {
-        const updatedDish = await updateDish(editDishId, dishPayload);
-        updatedDishes = dishes.map((dish) =>
-          dish.id === editDishId ? updatedDish : dish
-        );
+        const response = await updateDish(editDishId, dishPayload);
+        if (response.success) {
+          toast.success("Dish updated successfully");
+          updatedDishes = dishes.map((dish) =>
+            dish.id === editDishId ? response.data : dish
+          );
+        } else {
+          throw new Error(response.message || "Failed to update dish.");
+        }
       } else {
-        const addedDish = await addDish(dishPayload);
-        updatedDishes = [...dishes, addedDish];
+        const response = await addDish(dishPayload);
+        if (response.success) {
+          toast.success("Dish Added successfully");
+          updatedDishes = [...dishes, response.data];
+        } else {
+          throw new Error(response.message || "Failed to add dish.");
+        }
       }
 
       setDishes(updatedDishes);
       setIsDishModalOpen(false);
-      window.location.reload();
     } catch (error) {
       console.error("Error saving dish:", error);
+      toast.error(error.message || "An error occurred while saving the dish.");
     }
   };
 
   const handleAddCategory = async () => {
-    if (!newCategory.trim()) return; // Prevent empty categories
+    if (!newCategory.trim()) return;
 
     try {
-      // Retrieve truck details correctly
       const truckData = localStorage.getItem("dsquare_valid_truck");
-      if (!truckData) {
+      if (!truckData)
         throw new Error("No truck data found. Please log in again.");
-      }
 
-      const truck = JSON.parse(truckData); // Parse the string
-      if (!truck.id) {
+      const truck = JSON.parse(truckData);
+      if (!truck.id)
         throw new Error("Invalid truck data. Please log in again.");
-      }
 
-      // Call API to add category
-      const addedCategory = await addCategory({
+      const response = await addCategory({
         name: newCategory,
-        truck_id: truck.id, // Ensure correct truck_id
+        truck_id: truck.id,
       });
-      const categoryId = addedCategory?.id || addedCategory?.data?.id || null;
-      if (categoryId) {
-        setCategories([...categories, addedCategory]); // Update UI
-        setSelectedCategory(addedCategory.id);
-        window.location.reload();
+      if (response.success && response.data?.id) {
+        toast.success("Category added successfully");
+        setCategories([...categories, response.data]);
+        setSelectedCategory(response.data.id);
+        setNewCategory("");
+        setIsCategoryModalOpen(false);
       } else {
-        throw new Error("Failed to add category. Invalid response from API.");
+        throw new Error(response.message || "Failed to add category.");
       }
-
-      setNewCategory(""); // Reset input
-      setIsCategoryModalOpen(false); // Close modal
     } catch (error) {
       console.error("Error adding category:", error);
+      toast.error(
+        error.message || "An error occurred while adding the category."
+      );
+    }
+  };
+
+  const handleFoodItemDelete = async () => {
+    try {
+      const response = await deleteDish(selectedItemForDelete); // Call API to delete dish
+
+      if (response.success) {
+        // Remove deleted dish from the list
+        setDishes((dishes) =>
+          dishes.filter((dish) => dish.id !== selectedItemForDelete)
+        );
+
+        toast.success("Dish deleted successfully!");
+      } else {
+        throw new Error(response.message || "Failed to delete the dish.");
+      }
+      setSelectedItemForDelete(0);
+      setIsDeleteOpenModel(false);
+    } catch (error) {
+      console.error("Error deleting dish:", error);
+      toast.error(error.message || "Something went wrong!");
     }
   };
 
@@ -207,23 +243,67 @@ const AddDishSection = () => {
             + Add new dish
           </div>
           {dishes.map((dish) => (
-            <div key={dish.id} className="bg-gray-800  p-4 rounded">
-              <img
-                src={dish.image}
-                alt={dish.name}
-                className="w-full h-32 object-cover rounded mb-2"
-              />
-              <h3 className="text-lg font-semibold">{dish.name}</h3>
-              <p className="text-gray-400">
-                {dish.price} •{" "}
-                {dish.is_available ? "Available" : "Not available"}
-              </p>
-              <button
-                onClick={() => handleOpenEditModal(dish)}
-                className="mt-2 w-full bg-highlight-bg-icon px-4 py-2 rounded"
+            <div
+              key={dish.id}
+              className="bg-gray-800 relative rounded-lg overflow-hidden shadow-lg cursor-pointer border border-gray-700"
+            >
+              {/* Dish Image with Hover Effect */}
+              <div className="relative">
+                <img
+                  src={dish.image}
+                  alt={dish.name}
+                  className="w-full h-36 object-cover bg-black transition-transform duration-300 hover:scale-105"
+                />
+                {!dish.is_available && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <p className="text-white text-sm font-bold">
+                      Not Available
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Dish Details */}
+              <div className="p-4">
+                {/* Dish Name */}
+                <h3
+                  className="text-lg font-semibold text-white text-center truncate"
+                  title={dish.name}
+                >
+                  {dish.name}
+                </h3>
+
+                {/* Price & Availability */}
+                <p className="text-gray-400 text-center mt-1">
+                  ₹{dish.price} •{" "}
+                  <span
+                    className={`font-semibold ${
+                      dish.is_available ? "text-green-400" : "text-red-400"
+                    }`}
+                  >
+                    {dish.is_available ? "Available" : "Not Available"}
+                  </span>
+                </p>
+
+                {/* Edit Button */}
+                <button
+                  onClick={() => handleOpenEditModal(dish)}
+                  className="mt-3 w-full bg-highlight-bg-icon hover:bg-red-500 text-white font-medium py-2 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring focus:ring-red-400"
+                >
+                  <FontAwesomeIcon icon={faEdit} />
+                  <span>Edit Dish</span>
+                </button>
+              </div>
+              <div
+                onClick={() => deleteModel(dish.id)}
+                className="flex gap-1  items-center bg-gray-700 w-fit p-1 rounded-full absolute top-1 right-1"
               >
-                Edit Dish
-              </button>
+                <span className="text-xs">Delete dish</span>
+                <FontAwesomeIcon
+                  icon={faTimesCircle}
+                  className="text-red-500"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -346,6 +426,31 @@ const AddDishSection = () => {
                 className="px-4 py-2 bg-green-500 rounded"
               >
                 Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isDeleteOpenModel && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-gray-800 p-6 rounded shadow-lg">
+            <p className="text-lg">Are you really want to delete the item</p>
+            <div className="w-full flex justify-evenly gap-2 my-2">
+              <button
+                onClick={handleFoodItemDelete}
+                className="bg-green-500 w-full p-1 rounded-md"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => {
+                  setIsDeleteOpenModel(!isDeleteOpenModel);
+                  setSelectedItemForDelete(0);
+                }}
+                className="bg-red-500 w-full p-1 rounded-md"
+              >
+                No
               </button>
             </div>
           </div>

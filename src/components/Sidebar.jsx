@@ -4,6 +4,7 @@ import {
   faArrowRightFromBracket,
   faBookmark,
   faChartBar,
+  faChartPie,
   faReceipt,
   faSquarePlus,
 } from "@fortawesome/free-solid-svg-icons";
@@ -20,7 +21,7 @@ const Sidebar = () => {
   const menuItems = [
     { name: "home", icon: faReceipt },
     { name: "orders", icon: faBookBookmark },
-    { name: "analytics", icon: faChartBar },
+    { name: "analytics", icon: faChartPie },
     { name: "dish", icon: faSquarePlus },
     { name: "logout", icon: faArrowRightFromBracket },
   ];

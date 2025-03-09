@@ -20,7 +20,7 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 3px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {

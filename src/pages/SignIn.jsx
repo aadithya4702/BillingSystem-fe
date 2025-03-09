@@ -60,7 +60,6 @@ const Signin = () => {
     } else {
       try {
         const loginResponse = await loginUser({ email, password });
-        console.log(loginResponse);
 
         if (loginResponse?.status === 200) {
           localStorage.setItem(
@@ -87,7 +86,6 @@ const Signin = () => {
           toast.error("Login failed. Please check your credentials.");
         }
       } catch (error) {
-        console.error("Login error:", error);
         toast.error("Login failed. Please try again.");
       }
     }

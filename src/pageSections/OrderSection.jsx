@@ -4,7 +4,14 @@ import React from "react";
 import { getDishes } from "../api/Dishes";
 import { placeOrder } from "../api/Order";
 import { toast } from "react-toastify";
+import EmptyCart from "../assets/empty_cart.svg";
 import { generateBill } from "../api/Bill";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faWallet,
+  faMoneyBillTransfer,
+  faCreditCard,
+} from "@fortawesome/free-solid-svg-icons";
 
 const OrderSection = () => {
   const [isExpanded, setIsExpanded] = useState(false); // Toggle state
@@ -175,19 +182,22 @@ const OrderSection = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row max-h-screen md:pb-0 pb-20   overflow-y-auto bg-gray-900 text-white">
+    <div className="flex  flex-col md:flex-row max-h-screen md:pb-0 pb-20   overflow-y-auto bg-gray-900 text-white">
       {/* Main Content */}
       <main className="w-full  flex-1 pb-6 pl-6 custom-scrollbar mb-10 overflow-auto">
         <div className="mb-4 bg-gray-900 p-4 sticky top-0 z-10">
-          <div className="flex flex-col md:flex-row  justify-between ">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* Left Section - Title & Date */}
             <div>
-              <h1 className="text-2xl md:text-lg font-bold">Choose Dishes</h1>
-              <p className="text-sm sm:text-md text-input-text-color ">{`${getFormattedDate()}`}</p>
+              <h1 className="text-lg  md:text-2xl font-bold">Choose Dishes</h1>
+              <p className="text-xs sm:text-sm md:text-md text-input-text-color">{`${getFormattedDate()}`}</p>
             </div>
-            <div className="relative mt-2 md:mt-0">
-              <Search className="absolute left-3 top-2.5 text-gray-400" />
+
+            {/* Right Section - Search Bar */}
+            <div className="relative w-full  ">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
-                className="pl-10 bg-gray-700 text-white p-2 rounded w-full md:w-auto"
+                className="pl-10 pr-4 py-2.5 bg-gray-700 text-white rounded w-full"
                 placeholder="Search for food..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -196,7 +206,7 @@ const OrderSection = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 pr-6 relative sm:grid-cols-2 lg:grid-cols-2 md:grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 pr-6 relative sm:grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-6">
           {filteredProducts.map((product) => {
             const cartItem = cart.find((item) => item.id === product.id);
 
@@ -210,30 +220,33 @@ const OrderSection = () => {
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="rounded-full object-cover h-[120px] w-[120px] bg-black border-4 border-gray-800 shadow-md"
+                    className="rounded-full object-cover h-[100px] w-[100px] bg-black border-4 border-gray-800 shadow-md"
                   />
                 </div>
-                <h2 className="text-lg font-semibold text-white text-center mt-8">
+                <h2
+                  className="lg:text-lg text-sm font-light text-white text-center mt-3 text-ellipsis whitespace-normal overflow-hidden"
+                  title={`${product.name}`}
+                >
                   {product.name}
                 </h2>
-                <p className="text-gray-400 font-medium mt-1 text-center">
+                <p className="text-gray-300 lg:text-lg text-sm  font-medium mt-1 text-center">
                   ₹ {product.price.toFixed(2)}
                 </p>
-                <div className="flex justify-center">
+                {/* <div className="flex justify-center">
                   <p
                     className="text-sm text-gray-500  truncate overflow-hidden whitespace-nowrap max-w-[200px]"
                     title={`${product.description}`}
                   >
                     {product.description}
                   </p>
-                </div>
+                </div> */}
 
                 {/* Cart Controls */}
-                <div className="mt-4">
+                <div className="mt-4 ">
                   {cartItem && cartItem.qty > 0 ? (
                     <div className="flex items-center justify-between">
                       {/* Quantity Selector */}
-                      <div className="flex items-center justify-between border-2 border-red-400 p-2 rounded-lg w-3/4">
+                      <div className="flex items-center justify-center gap-5  p-2 rounded-lg w-full">
                         {/* Decrease Quantity */}
                         <button
                           className="bg-red-500 hover:bg-red-500 text-white px-3 py-1 rounded-lg"
@@ -251,7 +264,7 @@ const OrderSection = () => {
                         </button>
 
                         {/* Quantity Display */}
-                        <span className="text-white font-semibold">
+                        <span className="text-white font-semibold ">
                           {cartItem.qty}
                         </span>
 
@@ -267,16 +280,20 @@ const OrderSection = () => {
                       </div>
 
                       {/* Delete Button */}
-                      <button
+                      {/* <button
                         className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg ml-2"
                         onClick={() => removeFromCart(product.id)}
                       >
                         🗑️
-                      </button>
+                      </button> */}
                     </div>
                   ) : (
                     <button
-                      className="w-full bg-highlight-bg-icon  hover:bg-red-600 text-white py-2 rounded-lg transition-colors duration-300"
+                      className={`w-full py-2 rounded-lg transition-colors duration-300 ${
+                        product.is_available
+                          ? "bg-highlight-bg-icon hover:bg-red-500 text-white"
+                          : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                      }`}
                       onClick={() => addToCart(product)}
                       disabled={!product.is_available}
                     >
@@ -291,7 +308,7 @@ const OrderSection = () => {
       </main>
 
       <aside
-        className={`fixed bottom-14 left-0  w-full md:w-1/3 lg:w-1/3 bg-gray-800 p-6 transition-all duration-300 md:relative md:h-screen md:overflow-auto flex flex-col z-20 ${
+        className={`fixed bottom-14 md:top-0 left-0  w-full md:w-2/5 lg:w-1/3 bg-gray-800 md:p-2 p-6 transition-all duration-300 md:relative md:h-screen md:overflow-auto flex flex-col z-20 ${
           showCart ? "h-1/3 overflow-y-auto" : "h-[50px]"
         }`}
       >
@@ -308,7 +325,7 @@ const OrderSection = () => {
         </div>
 
         {/* Title for Large Screens (Always Visible) */}
-        <h2 className="hidden mt-10 md:block text-xl  font-bold text-white  mb-4">
+        <h2 className="hidden mt-5 md:block text-xl  font-bold text-white  mb-4">
           # Orders
         </h2>
 
@@ -319,64 +336,108 @@ const OrderSection = () => {
           }`}
         >
           {cart.length > 0 ? (
-            cart.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between items-center bg-gray-700 p-2 rounded"
-              >
-                <div>
-                  <h3 className="text-sm font-semibold">{item.name}</h3>
-                  <p className="text-xs text-gray-400">
-                    ₹{item.price.toFixed(2)} x {item.qty}
-                  </p>
-                </div>
-                <div className="flex items-center">
-                  {/* Quantity Input */}
-                  <input
-                    type="number"
-                    min="1"
-                    value={item.qty}
-                    onChange={(e) => updateQty(item.id, Number(e.target.value))}
-                    className="w-12 text-center bg-gray-600 text-white p-1 rounded"
-                  />
-                  {/* Delete Button */}
-                  <button
-                    className="ml-2 text-red-500"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    <Trash />
-                  </button>
-                </div>
-              </div>
-            ))
+            <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+              <table className="w-full border-collapse text-white">
+                {/* Table Header - Fixed */}
+                <thead className="border-b border-input-text-color bg-gray-800 sticky top-0 z-10">
+                  <tr className="text-sm font-medium">
+                    <th className="p-2 text-left">Item</th>
+                    <th className="p-2 text-center">Qty</th>
+                    <th className="p-2 text-right">Price</th>
+                  </tr>
+                </thead>
+
+                {/* Table Body - Scrollable */}
+                <tbody>
+                  {cart.map((item) => (
+                    <tr key={item.id} className="border-b border-gray-600">
+                      {/* Item Name (Ellipses for long names) */}
+                      <td className="p-2 max-w-[120px] truncate">
+                        <span className="block text-xs md:w-[70px] w-[50px] overflow-hidden text-ellipsis whitespace-nowrap">
+                          {item.name}
+                        </span>
+                        <p className="text-xs text-gray-400">
+                          ₹{item.price.toFixed(2)}
+                        </p>
+                      </td>
+
+                      {/* Quantity Control */}
+                      <td className="p-2 text-center text-sm flex items-center justify-center gap-1">
+                        <button
+                          className="bg-red-500 text-white w-6 h-6 flex items-center justify-center rounded-lg hover:bg-red-600"
+                          onClick={() => {
+                            const newQty = Math.max(item.qty - 1, 0);
+                            if (newQty === 0) {
+                              removeFromCart(item.id); // Remove item if quantity is 0
+                            } else {
+                              updateQty(item.id, newQty);
+                            }
+                          }}
+                        >
+                          -
+                        </button>
+
+                        <span className="text-white mx-1 text-center">
+                          {item.qty}
+                        </span>
+
+                        <button
+                          className="bg-green-500 text-white w-6 h-6 flex items-center justify-center rounded-lg hover:bg-green-600"
+                          onClick={() => updateQty(item.id, item.qty + 1)}
+                        >
+                          +
+                        </button>
+                      </td>
+
+                      {/* Price */}
+                      <td className="p-2 text-right text-sm">
+                        ₹{(item.price * item.qty).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <p className="text-center text-gray-400">Your cart is empty.</p>
+            <div>
+              <div className="md:flex items-center mb-3 justify-center hidden">
+                <img src={EmptyCart} alt="" className="w-3/4" />
+              </div>
+              <p className="text-center text-gray-400">Your cart is empty.</p>
+            </div>
           )}
         </div>
 
         {showCart && cart.length > 0 && (
-          <div className="mt-4 p-3 rounded-lg">
+          <div className="mt-4 p-3  border-t border-gray-700">
             <h3 className="text-white text-sm font-semibold mb-2">
               Payment Method
             </h3>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {[
-                { id: "cash", label: "Cash" },
-                { id: "upi", label: "UPI" },
-                { id: "paypal", label: "PayPal" },
+                { id: "cash", label: "Cash", icon: faWallet },
+                { id: "upi", label: "UPI", icon: faMoneyBillTransfer },
+                { id: "card", label: "Card", icon: faCreditCard },
               ].map((method) => (
                 <label
                   key={method.id}
-                  className="flex items-center gap-2 text-white text-sm bg-gray-600 px-3 py-2 rounded-lg cursor-pointer"
+                  className={`flex flex-col relative items-center justify-center gap-2 text-white text-sm p-3 rounded-lg cursor-pointer w-full sm:w-auto transition-all duration-300 
+            ${
+              selectedPayment === method.id
+                ? " bg-icon-color"
+                : "bg-gray-600 hover:bg-gray-500"
+            }`}
                 >
                   <input
                     type="radio"
                     name="payment"
                     id={method.id}
-                    checked={selectedPayment === method.id} // Check if this payment is selected
-                    onChange={handlePaymentChange} // Update the state on selection change
+                    className=" absolute top-1 right-1 "
+                    checked={selectedPayment === method.id}
+                    onChange={handlePaymentChange}
                   />
-                  {method.label}
+                  <FontAwesomeIcon icon={method.icon} className="text-xs" />
+                  <span className="text-xs">{method.label}</span>
                 </label>
               ))}
             </div>

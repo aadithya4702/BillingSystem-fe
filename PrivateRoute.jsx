@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import { UserContext } from "./src/context/UserContext";
 
 const PrivateRoute = ({ component }) => {
+  const token = localStorage.getItem("dsquare_token");
   const { user } = useContext(UserContext);
 
   if (!user) {

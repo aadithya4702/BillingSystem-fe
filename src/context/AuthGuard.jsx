@@ -6,8 +6,9 @@ const AuthGuard = ({ children }) => {
 
   useEffect(() => {
     const truckData = localStorage.getItem("dsquare_valid_truck");
+    const token = localStorage.getItem("dsquare_token");
 
-    if (truckData) {
+    if (truckData && token) {
       // ✅ If logged in, redirect to home
       navigate("/home", { replace: true });
     }
