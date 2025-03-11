@@ -129,17 +129,17 @@ const AnalyticSection = () => {
             {getFormattedDate()}
           </p>
         </div>
-        <FilterComponent
+        {/* <FilterComponent
           onFilterChange={(filter) => console.log("Selected Filter:", filter)}
-        />
+        /> */}
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
+      <div className="flex flex-col lg:flex-row mb-20 md:mb-2 gap-4 md:gap-6">
         {/* Left Section */}
         <div className="w-full lg:w-3/4">
           {/* Cards */}
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 p-2">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-2 gap-4 p-2">
             {cardItems.map((item, index) => (
               <div
                 key={index}
@@ -182,21 +182,28 @@ const AnalyticSection = () => {
 
           {/* Recent Orders Table */}
           <div className="bg-custom-dark-purple p-3 md:p-4 rounded-lg shadow-lg mt-4 md:mt-6 overflow-x-auto">
-            <h3 className="text-white text-lg md:text-xl font-semibold mb-3 md:mb-4">
-              Recent Orders
-            </h3>
-            <div className="max-h-60 md:max-h-80 overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center pb-4">
+              <h3 className="text-white text-lg md:text-xl font-semibold mb-3 md:mb-4">
+                Recent Orders
+              </h3>
+              <FilterComponent
+                onFilterChange={(filter) =>
+                  console.log("Selected Filter:", filter)
+                }
+              />
+            </div>
+            <div className="max-h-60 md:max-h-80   overflow-y-auto custom-scrollbar">
               <table className="w-full text-white text-sm md:text-base">
-                <thead className=" sticky top-0 bg-custom-dark-purple   text-xs md:text-sm">
+                <thead className="sticky top-0  bg-custom-dark-purple text-xs md:text-sm z-10 border-b-2 border-gray-300 shadow-md">
                   <tr>
                     <th className="px-2 md:px-4 py-1 md:py-2 text-left">
-                      Customer
-                    </th>
-                    <th className="px-2 md:px-4 py-1 md:py-2 text-left">
-                      Menu
+                      Order Id
                     </th>
                     <th className="px-2 md:px-4 py-1 md:py-2 text-left">
                       Price
+                    </th>
+                    <th className="px-2 md:px-4 py-1 md:py-2 text-left">
+                      Payment Method
                     </th>
                     <th className="px-2 md:px-4 py-1 md:py-2 text-left">
                       Status
@@ -204,29 +211,21 @@ const AnalyticSection = () => {
                   </tr>
                 </thead>
 
-                <tbody>
-                  {[
-                    "John Doe",
-                    "Jane Smith",
-                    "Mark Johnson",
-                    "Jane Smith",
-                    "Mark Johnson",
-                    "Jane Smith",
-                    "Mark Johnson",
-                    "Jane Smith",
-                    "Mark Johnson",
-                    "Jane Smith",
-                    "Mark Johnson",
-                  ].map((customer, index) => (
-                    <tr key={index} className=" hover:bg-gray-800 transition">
-                      <td className="px-2 md:px-4 py-1 md:py-2">{customer}</td>
-                      <td className="px-2 md:px-4 py-1 md:py-2">Pizza</td>
-                      <td className="px-2 md:px-4 py-1 md:py-2">$12.99</td>
-                      <td className="px-2 md:px-4 py-1 md:py-2 text-green-400">
-                        Delivered
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="overflow-y-auto">
+                  {[101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111].map(
+                    (customer, index) => (
+                      <tr key={index} className="hover:bg-gray-800 transition">
+                        <td className="px-2 md:px-4 py-1 md:py-2">
+                          {customer}
+                        </td>
+                        <td className="px-2 md:px-4 py-1 md:py-2">$12.99</td>
+                        <td className="px-2 md:px-4 py-1 md:py-2">UPI</td>
+                        <td className="px-2 md:px-4 py-1 md:py-2 text-green-400">
+                          Delivered
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
@@ -235,13 +234,18 @@ const AnalyticSection = () => {
 
         {/* Right Section */}
         <div className="w-full lg:w-2/5">
-          <div className="bg-custom-dark-purple p-3 md:p-4 rounded-lg shadow-lg">
-            <div className="border-b-2 pb-2 border-input-text-color items-center mb-3 md:mb-4">
+          <div className="bg-custom-dark-purple md:h-[90%] p-3 md:p-4 rounded-lg shadow-lg">
+            <div className="flex justify-between border-b-2 pb-4 border-input-text-color items-center mb-3 md:mb-4">
               <h3 className="text-white text-lg md:text-xl font-semibold">
                 Most Ordered
               </h3>
+              <FilterComponent
+                onFilterChange={(filter) =>
+                  console.log("Selected Filter:", filter)
+                }
+              />
             </div>
-            <div className="max-h-[200px] md:max-h-[250px] overflow-y-auto custom-scrollbar">
+            <div className="h-[450px] overflow-y-auto custom-scrollbar">
               {orderedItems.map((item, index) => (
                 <div
                   key={index}

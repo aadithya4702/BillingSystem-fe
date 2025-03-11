@@ -29,7 +29,7 @@ const Analytics = () => {
 
       {/* Dynamic content area */}
       <div className="flex-grow">
-        <AnalyticSection />{" "}
+        <AnalyticSection />
         {/* Renders the child routes (Order, AddDish, etc.) */}
       </div>
     </div>

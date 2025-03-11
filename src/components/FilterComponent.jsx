@@ -44,7 +44,7 @@ const FilterComponent = ({ onFilterChange }) => {
       <button
         onClick={() => setShowDropdown(!showDropdown)}
         className="flex justify-center items-center px-4 py-2 rounded-md text-sm font-semibold transition-all duration-300 
-                  bg-custom-font-color-orange text-white hover:bg-orange-600"
+                  bg-transparent border-2 border-input-text-color text-white "
       >
         <FontAwesomeIcon icon={faFilter} className="mr-2 text-lg" />
         {selectedFilter}
