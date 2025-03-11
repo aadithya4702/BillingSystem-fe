@@ -23,7 +23,7 @@ import AnalyticSection from "../pageSections/AnalyticSection";
 
 const Analytics = () => {
   return (
-    <div className="flex">
+    <div className="flex max-h-screen">
       {/* Sidebar stays fixed */}
       <Sidebar />
 

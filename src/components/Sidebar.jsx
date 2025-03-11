@@ -12,7 +12,6 @@ import { NavLink, useLocation } from "react-router-dom";
 import { logout } from "../api/Signin";
 import { toast } from "react-toastify";
 import { UserContext } from "../context/UserContext";
-import { faBookBookmark } from "@fortawesome/free-solid-svg-icons/faBookBookmark";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -20,7 +19,6 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: "home", icon: faReceipt },
-    { name: "orders", icon: faBookBookmark },
     { name: "analytics", icon: faChartPie },
     { name: "dish", icon: faSquarePlus },
     { name: "logout", icon: faArrowRightFromBracket },
@@ -39,7 +37,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Sidebar for large screens */}
-      <div className="hidden md:flex md:flex-col md:w-20  p-2 items-center justify-evenly bg-custom-dark-purple">
+      <div className="hidden md:flex md:flex-col h-screen left-0 md:w-20  p-2 items-center justify-evenly bg-custom-dark-purple">
         <div className="bg-logo-outer-color p-2 rounded-md">
           <FontAwesomeIcon
             icon={faReceipt}

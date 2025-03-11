@@ -23,9 +23,9 @@
     width: 3px;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-track {
+  /* .custom-scrollbar::-webkit-scrollbar-track {
     @apply bg-gray-200;
-  }
+  } */
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-orange-300 rounded-lg;

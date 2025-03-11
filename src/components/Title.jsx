@@ -16,14 +16,6 @@ const getFormattedDate = () => {
 
 const Title = () => {
   return (
-    // <div>
-    //   <div className="w-[75%] ">
-    //     <h1 className="text-2xl text-white ">Dashboard</h1>
-    //     <p className="text-md text-input-text-color mb-5">{`${getFormattedDate()}`}</p>
-    //     <hr class="border-0 h-[1px] bg-input-text-color " />
-    //   </div>
-    // </div>
-
     <div>
       <div className="">
         <h1 className="text-md sm:text-xl text-white">Dashboard</h1>
