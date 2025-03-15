@@ -237,7 +237,7 @@ const AddDishSection = () => {
         {/* Dish List */}
         <div className="grid mb-20 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
           <div
-            className="border-2 border-dashed border-highlight-bg-icon text-highlight-bg-icon flex items-center justify-center p-6 cursor-pointer hover:bg-gray-800"
+            className="border-2 border-dashed border-highlight-bg-icon text-highlight-bg-icon flex items-center justify-center p-6 cursor-pointer rounded-lg hover:bg-gray-800"
             onClick={handleOpenAddModal}
           >
             + Add new dish
@@ -312,7 +312,7 @@ const AddDishSection = () => {
       {/* Dish Modal */}
       {isDishModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-gray-800 p-6 rounded shadow-lg w-full max-w-md">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
             <h3 className="text-lg font-bold mb-4">
               {isEditing ? "Edit Dish" : "Add New Dish"}
             </h3>

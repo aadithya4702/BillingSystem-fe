@@ -181,7 +181,7 @@ const AnalyticSection = () => {
           </div>
 
           {/* Recent Orders Table */}
-          <div className="bg-custom-dark-purple p-3 md:p-4 rounded-lg shadow-lg mt-4 md:mt-6 overflow-x-auto">
+          <div className="bg-custom-dark-purple p-3 md:p-4 rounded-lg shadow-lg mt-4 md:mt-6  ">
             <div className="flex justify-between items-center pb-4">
               <h3 className="text-white text-lg md:text-xl font-semibold mb-3 md:mb-4">
                 Recent Orders
@@ -194,7 +194,7 @@ const AnalyticSection = () => {
             </div>
             <div className="max-h-60 md:max-h-80   overflow-y-auto custom-scrollbar">
               <table className="w-full text-white text-sm md:text-base">
-                <thead className="sticky top-0  bg-custom-dark-purple text-xs md:text-sm z-10 border-b-2 border-gray-300 shadow-md">
+                <thead className="  bg-custom-dark-purple text-xs md:text-sm z-10 border-b-2 border-gray-300 shadow-md">
                   <tr>
                     <th className="px-2 md:px-4 py-1 md:py-2 text-left">
                       Order Id
@@ -219,7 +219,7 @@ const AnalyticSection = () => {
                           {customer}
                         </td>
                         <td className="px-2 md:px-4 py-1 md:py-2">$12.99</td>
-                        <td className="px-2 md:px-4 py-1 md:py-2">UPI</td>
+                        <td className="px-2 md:px-4 py-1 md:py-2">lorem100</td>
                         <td className="px-2 md:px-4 py-1 md:py-2 text-green-400">
                           Delivered
                         </td>

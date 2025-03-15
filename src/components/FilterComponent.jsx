@@ -51,7 +51,7 @@ const FilterComponent = ({ onFilterChange }) => {
       </button>
 
       {showDropdown && (
-        <div className="absolute z-10 mt-2 right-2 w-52 bg-[#1E1F29] shadow-lg rounded-md border border-gray-700">
+        <div className="absolute z-30 mt-2 right-2 w-52 bg-[#1E1F29] shadow-lg rounded-md border border-gray-700">
           {filterOptions.map((filter, index) => (
             <button
               key={index}

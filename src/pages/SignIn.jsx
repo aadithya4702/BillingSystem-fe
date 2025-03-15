@@ -93,7 +93,7 @@ const Signin = () => {
 
   return (
     <div className="h-screen flex items-center justify-center flex-col px-4">
-      <div className="w-full max-w-lg transition-all duration-300 ease-in-out min-h-[400px] flex flex-col gap-4 md:bg-custom-dark-purple md:shadow-custom p-6 rounded-2xl ">
+      <div className="w-full max-w-lg transition-all duration-300 ease-in-out min-h-[400px] flex flex-col gap-4 md:bg-custom-dark-purple md:shadow-custom md:p-6 py-6  rounded-2xl ">
         <h3 className="md:text-3xl text-2xl text-white text-center">
           {signup ? "Create an Account" : "Sign In"}
         </h3>
