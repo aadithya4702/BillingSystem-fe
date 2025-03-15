@@ -11,12 +11,15 @@ const api = axios.create({
   },
 });
 
-// Add a request interceptor to attach token
+// Add a request interceptor to attach token (except for login)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("dsquare_token"); // Retrieve token from localStorage (or another storage)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Skip adding token for login requests
+    if (!config.url.includes("/login")) {
+      const token = localStorage.getItem("dsquare_token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },

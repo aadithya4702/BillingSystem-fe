@@ -1,12 +1,9 @@
-import Axios from "axios";
 import { toast } from "react-toastify";
-
-Axios.defaults.baseURL = "http://localhost:8000/api";
-Axios.defaults.withCredentials = true;
+import api from "./axiosInstance";
 
 export const registerUser = async (userData) => {
   try {
-    const response = await Axios.post("/account", userData);
+    const response = await api.post("/account", userData);
     return response;
   } catch (error) {
     handleError(error);
@@ -15,7 +12,7 @@ export const registerUser = async (userData) => {
 
 export const loginUser = async (userData) => {
   try {
-    const response = await Axios.post("/login", userData);
+    const response = await api.post("/login", userData);
     return response;
   } catch (error) {
     handleError(error);
@@ -29,7 +26,7 @@ export const getTruckDetails = async () => {
       throw new Error("No token found. Please log in again.");
     }
 
-    const response = await Axios.get("/trucks", {
+    const response = await api.get("/trucks", {
       headers: {
         Authorization: `Bearer ${token}`, // Attach updated token
       },
@@ -47,7 +44,7 @@ export const logout = async () => {
     if (!token) {
       throw new Error("No token found. Please log in again.");
     }
-    const response = await Axios.post("/logout", {
+    const response = await api.post("/logout", {
       headers: {
         Authorization: `Bearer ${token}`, // Attach updated token
       },
