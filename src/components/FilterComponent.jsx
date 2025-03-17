@@ -10,8 +10,7 @@ import {
 
 const FilterComponent = ({ onFilterChange }) => {
   const filterOptions = [
-    "Current Day",
-    "Previous Day",
+    "Today",
     "Week",
     "Month",
     "Custom",

@@ -5,6 +5,7 @@ import { getDishes } from "../api/Dishes";
 import { placeOrder } from "../api/Order";
 import { toast } from "react-toastify";
 import EmptyCart from "../assets/empty_cart.svg";
+import logo from "../assets/d2_logo.png";
 import { generateBill } from "../api/Bill";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -184,13 +185,25 @@ const OrderSection = () => {
   return (
     <div className="flex  flex-col md:flex-row max-h-screen md:pb-0 pb-20   overflow-y-auto bg-gray-900 text-white">
       {/* Main Content */}
-      <main className="w-full  flex-1 pb-6 pl-6 custom-scrollbar mb-10 overflow-auto">
+      <main className="w-full   flex-1 pb-6  custom-scrollbar mb-10 overflow-auto">
         <div className="mb-4 bg-gray-900 p-4 sticky top-0 z-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Left Section - Title & Date */}
-            <div>
-              <h1 className="text-lg  md:text-2xl font-bold">Choose Dishes</h1>
-              <p className="text-xs sm:text-sm md:text-md text-input-text-color">{`${getFormattedDate()}`}</p>
+            <div className="flex items-center   rounded-lg">
+              <img
+                src={logo}
+                alt="Logo"
+                className="w-20 object-contain"
+              />
+
+              <div className="flex flex-col">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-input-text-color">
+                  Choose Dishes
+                </h1>
+                <p className="text-xs sm:text-sm md:text-base text-input-text-color">
+                  {getFormattedDate()}
+                </p>
+              </div>
             </div>
 
             {/* Right Section - Search Bar */}
@@ -206,7 +219,7 @@ const OrderSection = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 pr-6 relative sm:grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-6">
+        <div className="pl-6 grid grid-cols-1 pr-6 relative sm:grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-6">
           {filteredProducts.map((product) => {
             const cartItem = cart.find((item) => item.id === product.id);
 

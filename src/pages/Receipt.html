@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt</title>
+    <style>
+        @page {
+            size: auto;
+            margin: 0;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+
+
+        body {
+            font-family: monospace;
+            font-size: 10px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 58mm;
+            margin: auto;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .header {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .header img {
+            max-width: 80px;
+        }
+
+        .header p {
+            margin: 2px 0;
+            font-size: 10px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        th,
+        td {
+            padding: 4px;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .orderhead {
+            font-weight: bold;
+            text-decoration: underline;
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        .items td.item-name {
+            max-width: 70px;
+            text-align: left;
+            word-wrap: break-word;
+            /* Uncomment below line to use ellipsis instead of wrapping */
+            /* white-space: nowrap; overflow: hidden; text-overflow: ellipsis; */
+        }
+
+        .total {
+            font-size: 12px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .footer {
+            font-size: 10px;
+            margin-top: 10px;
+        }
+
+        .footer p {
+            margin: 3px 0;
+        }
+
+        .footer .thank-you {
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 10px;
+            }
+
+            .container {
+                width: 58mm;
+                padding: 5px;
+            }
+
+            .divider {
+                margin: 8px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <img src="../assets/image.png" alt="logo">
+            <div>
+                <p><strong>Ph. No:</strong> 0987654321</p>
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias saepe dignissimos voluptates tempore
+                    veniam quam.</p>
+            </div>
+        </div>
+
+        <!-- Order Details -->
+        <p class="orderhead">Order Details</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order No.</th>
+                    <th>Issued Date</th>
+                    <th>Payment Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ $order['id'] }}</td>
+                    <td>{{ $order['date'] }},{{ $order['time'] }}</td>
+                    <td>{{ $order['payment'] }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <!-- Items Table -->
+        <table class="items">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($order['items'] as $item)
+                <tr>
+                    <td class="item-name">{{ $item['name'] }}</td>
+                    <td>{{ $item['quantity'] }}</td>
+                    <td>&#8377;{{ number_format($item['price'], 2) }}</td>
+                    <td>&#8377;{{ number_format($item['quantity'] * $item['price'], 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <!-- Total Section -->
+        <div class="total">
+            <p>Total Amount: &#8377;{{ number_format($order['total'], 2) }}</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Footer Section -->
+        <div class="footer">
+            <p class="thank-you">&#x1F60E; Thank you! Visit Again! &#128075;</p>
+            <p>For inquiries, call +91 0987654321</p>
+            <p>Follow us: @insta_foods</p>
+        </div>
+    </div>
+</body>
+
+</html>

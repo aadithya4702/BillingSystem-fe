@@ -38,7 +38,7 @@ export const getTruckDetails = async () => {
   }
 };
 
-export const logout = async () => {
+export const logoutCall = async () => {
   try {
     const token = localStorage.getItem("dsquare_token"); // Get token dynamically
     if (!token) {
