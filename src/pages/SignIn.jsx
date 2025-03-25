@@ -66,6 +66,7 @@ const Signin = () => {
             "dsquare_token",
             loginResponse.data.token.accessToken
           );
+          localStorage.setItem("dsquare_name", loginResponse.data.name);
           toast.success("Login Successful!");
 
           try {

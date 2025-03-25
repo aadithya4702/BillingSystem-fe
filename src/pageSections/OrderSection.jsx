@@ -38,6 +38,7 @@ const OrderSection = () => {
     "aaaaaaaaaaaaaaaaaaaaaaaa",
   ];
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -62,6 +63,11 @@ const OrderSection = () => {
         setLoading(false); // Ensure loading is stopped
       }
     };
+
+    const storedUser = localStorage.getItem("dsquare_name");
+    if (storedUser) {
+      setUserName(storedUser); // Adjust based on your stored object
+    }
 
     fetchProducts();
   }, []);
@@ -193,12 +199,12 @@ const OrderSection = () => {
               <img
                 src={logo}
                 alt="Logo"
-                className="w-20 object-contain"
+                className="w-28  md:w-30 lg:w-32 max-w-xs h-auto object-contain"
               />
 
               <div className="flex flex-col">
                 <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-input-text-color">
-                  Choose Dishes
+                  {userName ? `Hi, ${userName}` : "Choose Dishes"}
                 </h1>
                 <p className="text-xs sm:text-sm md:text-base text-input-text-color">
                   {getFormattedDate()}
@@ -321,14 +327,15 @@ const OrderSection = () => {
       </main>
 
       <aside
-        className={`fixed bottom-14 md:top-0 left-0  w-full md:w-2/5 lg:w-1/3 bg-gray-800 md:p-2 p-6 transition-all duration-300 md:relative md:h-screen md:overflow-auto flex flex-col z-20 ${
+        className={`fixed bottom-14 md:top-0 left-0  w-full md:w-2/5 lg:w-1/3 bg-gray-800  md:p-2  transition-all duration-300 md:relative md:h-screen md:overflow-auto flex flex-col z-20 ${
           showCart ? "h-1/3 overflow-y-auto" : "h-[50px]"
         }`}
+        style={{ boxShadow: "0 -8px 6px -2px rgba(234, 124 ,s105, 0.3)" }} // Custom top shadow (Red)
       >
         {/* Orders Header & Toggle Button */}
         {/* Title for Small Screens (Collapsible) */}
         <div
-          className="flex justify-between  items-center cursor-pointer md:hidden"
+          className="flex justify-between sticky top-0 bg-gray-800 z-10 p-2  items-center cursor-pointer md:hidden"
           onClick={() => setShowCart(!showCart)}
         >
           <h2 className="text-xl font-bold  text-white">Orders</h2>
@@ -344,7 +351,7 @@ const OrderSection = () => {
 
         {/* Order Items (Show only when expanded) */}
         <div
-          className={`mt-4 space-y-4 min-h-[200px] custom-scrollbar transition-all duration-300 ${
+          className={`mt-4 p-2 space-y-4 min-h-[200px] custom-scrollbar transition-all duration-300 ${
             showCart ? "overflow-y-auto flex-1" : "hidden"
           }`}
         >
@@ -459,7 +466,7 @@ const OrderSection = () => {
 
         {/* Checkout Section (Only when expanded & items in cart) */}
         {showCart && cart.length > 0 && (
-          <div className="mt-4 border-t border-gray-700 pt-4">
+          <div className="mt-4 p-2  border-t border-gray-700 pt-4">
             <p className="text-lg font-semibold text-white">
               Subtotal: ₹{subtotal}
             </p>

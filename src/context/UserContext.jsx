@@ -35,6 +35,7 @@ export function UserContextProvider({ children }) {
   const logout = () => {
     localStorage.removeItem("dsquare_token");
     localStorage.removeItem("dsquare_valid_truck");
+    localStorage.removeItem("dsquare_name");
 
     Cookies.remove("dsquare_token");
 

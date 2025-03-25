@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 // Base API URL
 const API_BASE_URL = "http://localhost:8000/api";
@@ -24,6 +25,27 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Add a response interceptor to handle 401 errors globally
+api.interceptors.response.use(
+  (response) => response, // Pass successful responses through
+  (error) => {
+    if (error.response?.status === 401) {
+      // Unauthorized, force logout
+      toast.error("Session expired. Please log in again!", {
+        position: "top-right",
+      });
+      console.log("401 reaigh");
+
+      localStorage.removeItem("dsquare_token");
+      localStorage.removeItem("dsquare_valid_truck");
+      localStorage.removeItem("dsquare_name"); // Clear stored token
+      window.location.href = "/auth"; // Redirect to login page
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 // Export the configured Axios instance

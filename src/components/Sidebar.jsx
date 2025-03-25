@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRightFromBracket,
@@ -24,25 +24,25 @@ const Sidebar = () => {
   ];
 
   const { logout } = useContext(UserContext);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const logoutUser = async () => {
+    setShowLogoutModal(true); // Open modal on button click
+  };
+
+  const confirmLogout = async () => {
     const response = await logoutCall();
     if (response?.status === 200) {
       logout();
-      toast.success("Logged out successfully!", {
-        position: "top-right",
-      });
+      toast.success("Logged out successfully!", { position: "top-right" });
     }
+    setShowLogoutModal(false); // Close modal after logging out
   };
 
   return (
     <>
       {/* Sidebar for large screens */}
       <div className="hidden md:flex md:flex-col h-screen left-0 md:w-20 min-w-20 items-center justify-evenly bg-custom-dark-purple py-4">
-        <div className="w-full flex justify-center mb-4">
-          <img src={logo} alt="Logo" className="w-10 h-10 rounded-full" />
-        </div>
-
         {menuItems.map(({ name, icon }, index) => {
           const isActive = currentPath === `/${name}`;
 
@@ -135,6 +135,30 @@ const Sidebar = () => {
           }
         })}
       </div>
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 className="text-lg font-semibold text-input-text-color">
+              Are you sure you want to logout?
+            </h2>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="px-4 py-2 bg-highlight-bg-icon text-white rounded"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
