@@ -1,4 +1,3 @@
-import Axios from "axios";
 import { toast } from "react-toastify";
 import { Http } from "@capacitor-community/http";
 import { CapacitorHttp } from "@capacitor/core";
@@ -8,7 +7,7 @@ Axios.defaults.withCredentials = true;
 
 export const registerUser = async (userData) => {
   try {
-    const response = await Axios.post("/account", userData);
+    const response = await api.post("/account", userData);
     return response;
   } catch (error) {
     handleError(error);
@@ -47,7 +46,7 @@ export const getTruckDetails = async () => {
       throw new Error("No token found. Please log in again.");
     }
 
-    const response = await Axios.get("/trucks", {
+    const response = await api.get("/trucks", {
       headers: {
         Authorization: `Bearer ${token}`, // Attach updated token
       },
@@ -59,13 +58,13 @@ export const getTruckDetails = async () => {
   }
 };
 
-export const logout = async () => {
+export const logoutCall = async () => {
   try {
     const token = localStorage.getItem("dsquare_token"); // Get token dynamically
     if (!token) {
       throw new Error("No token found. Please log in again.");
     }
-    const response = await Axios.post("/logout", {
+    const response = await api.post("/logout", {
       headers: {
         Authorization: `Bearer ${token}`, // Attach updated token
       },
