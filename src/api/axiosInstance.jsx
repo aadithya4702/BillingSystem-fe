@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Base API URL
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = "https://d2square-server.d2delight.com/api";
 
 // Create an Axios instance
 const api = axios.create({
