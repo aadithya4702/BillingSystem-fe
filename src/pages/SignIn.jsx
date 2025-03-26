@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { registerUser, loginUser, getTruckDetails } from "../api/Signin";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const Signin = () => {
   const [signup, setSignup] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [conShowPassword, setConShowPassword] = useState(false);
   const navigate = useNavigate();
   const [user, setUser] = useState({
     name: "",
@@ -140,15 +144,29 @@ const Signin = () => {
           </div>
           <div className="relative mb-3 inputfield">
             <p className="text-xs font-light mb-1 text-white">Password</p>
-            <input
-              type="password"
-              name="password"
-              placeholder={signup ? "Create password" : "Enter password"}
-              value={user.password}
-              required
-              onChange={handleInputChange}
-              className="input w-full bg-transparent border p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder={signup ? "Create password" : "Enter password"}
+                value={user.password}
+                required
+                onChange={handleInputChange}
+                className="input w-full bg-transparent border p-2 h-[38px] text-sm rounded-[4px] text-input-text-color pr-10"
+              />
+              {/* Eye Icon for Show/Hide Password */}
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? (
+                  <FontAwesomeIcon icon={faEye} className="text-md" />
+                ) : (
+                  <FontAwesomeIcon icon={faEyeSlash} className="text-md" />
+                )}
+              </button>
+            </div>
           </div>
 
           {signup && (
@@ -156,15 +174,29 @@ const Signin = () => {
               <p className="text-xs font-light mb-1 text-white">
                 Confirm Password
               </p>
-              <input
-                type="password"
-                name="c_password"
-                placeholder="Confirm password"
-                value={user.c_password}
-                required
-                onChange={handleInputChange}
-                className="input w-full bg-transparent border p-2 h-[38px] text-sm rounded-[4px] text-input-text-color"
-              />
+              <div className="relative">
+                <input
+                  type={conShowPassword ? "text" : "password"}
+                  name="c_password"
+                  placeholder="Confirm password"
+                  value={user.c_password}
+                  required
+                  onChange={handleInputChange}
+                  className="input w-full bg-transparent border p-2 h-[38px] text-sm rounded-[4px] text-input-text-color pr-10"
+                />
+                {/* Eye Icon for Show/Hide Password */}
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  onClick={() => setConShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <FontAwesomeIcon icon={faEye} className="text-md" />
+                  ) : (
+                    <FontAwesomeIcon icon={faEyeSlash} className="text-md" />
+                  )}
+                </button>
+              </div>
             </div>
           )}
 

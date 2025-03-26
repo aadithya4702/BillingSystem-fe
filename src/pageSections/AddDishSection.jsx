@@ -97,13 +97,21 @@ const AddDishSection = () => {
   };
 
   const handleSaveDish = async () => {
+    // Assume existingDishes is an array of objects containing dish names
+    const isDishNameExists = dishes.some(
+      (dish) => dish.name.toLowerCase() === newDish.name.toLowerCase()
+    );
+
     if (
       !newDish.name ||
       !newDish.description ||
       !newDish.price ||
+      newDish.price <= 0 ||
       !newDish.category_id
     ) {
-      toast.error("All fields are required.");
+      toast.error(
+        "All fields are required and price must be greater than zero."
+      );
       return;
     }
 
