@@ -1,9 +1,7 @@
 import { toast } from "react-toastify";
 import { Http } from "@capacitor-community/http";
 import { CapacitorHttp } from "@capacitor/core";
-
-Axios.defaults.baseURL = "https://d2square-server.d2delight.com/api/";
-Axios.defaults.withCredentials = true;
+import api from "./axiosInstance";
 
 export const registerUser = async (userData) => {
   try {
@@ -30,7 +28,7 @@ export const loginUser = async (userData) => {
       return response;
     } else {
       // Use Axios for Web/iOS
-      const response = await Axios.post("/login", userData);
+      const response = await api.post("/login", userData);
       return response;
     }
   } catch (error) {
