@@ -8,6 +8,8 @@ import EmptyCart from "../assets/empty_cart.svg";
 import logo from "../assets/d2_logo.png";
 import { generateBill } from "../api/Bill";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 import {
   faWallet,
   faMoneyBillTransfer,
@@ -127,21 +129,58 @@ const OrderSection = () => {
   };
 
   const handlePaymentChange = (e) => {
-    setSelectedPayment(e.target.id); // This will update the state with the selected payment method
+    setSelectedPayment(e.target.id);
   };
 
-  const printBillDirectly = (blob) => {
-    const url = URL.createObjectURL(blob);
-    const iframe = document.createElement("iframe");
+  const printBillDirectly = async (blob) => {
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64data = reader.result.split(",")[1]; // Extract base64 content
+        const folderPath = "documents"; // Folder where the PDF will be stored
+        const fileName = `receipt_${Date.now()}.pdf`;
+        const filePath = `${folderPath}/${fileName}`;
 
-    iframe.style.display = "none";
-    iframe.src = url;
+        // 1️⃣ Ensure the folder exists before writing the file
+        try {
+          await Filesystem.readdir({
+            path: folderPath,
+            directory: Directory.Documents,
+          });
+        } catch (e) {
+          await Filesystem.mkdir({
+            path: folderPath,
+            directory: Directory.Documents,
+            recursive: true,
+          });
+        }
 
-    document.body.appendChild(iframe);
+        // 2️⃣ Save the PDF file in the device storage
+        await Filesystem.writeFile({
+          path: filePath,
+          data: base64data,
+          directory: Directory.Documents,
+          encoding: Encoding.Base64,
+        });
 
-    iframe.onload = () => {
-      iframe.contentWindow.print(); // Trigger print
-    };
+        // 3️⃣ Get file URI
+        const fileUri = await Filesystem.getUri({
+          path: filePath,
+          directory: Directory.Documents,
+        });
+
+        // 4️⃣ Open the file using Android's share menu (includes print option)
+        await Share.share({
+          title: "Print Receipt",
+          url: fileUri.uri,
+          dialogTitle: "Open PDF & Print",
+        });
+      };
+
+      reader.readAsDataURL(blob); // Convert blob to base64
+    } catch (error) {
+      console.error("Error printing bill:", error);
+    }
   };
 
   const addToCart = (product) => {
@@ -335,7 +374,7 @@ const OrderSection = () => {
         {/* Orders Header & Toggle Button */}
         {/* Title for Small Screens (Collapsible) */}
         <div
-          className="flex justify-between sticky top-0 bg-gray-800 z-10 p-2  items-center cursor-pointer md:hidden"
+          className="flex justify-between sticky top-0 bg-gray-800 z-20 p-2  items-center cursor-pointer md:hidden"
           onClick={() => setShowCart(!showCart)}
         >
           <h2 className="text-xl font-bold  text-white">Orders</h2>

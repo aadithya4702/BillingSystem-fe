@@ -13,6 +13,8 @@ import axios from "axios";
 import { getMostOrders, getRecentOrders } from "../api/Analytics";
 import { generateBill } from "../api/Bill";
 import { toast } from "react-toastify";
+import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 
 const AnalyticSection = () => {
   // Get Formatted Date
@@ -65,18 +67,55 @@ const AnalyticSection = () => {
     }
   };
 
-  const printBillDirectly = (blob) => {
-    const url = URL.createObjectURL(blob);
-    const iframe = document.createElement("iframe");
+  const printBillDirectly = async (blob) => {
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64data = reader.result.split(",")[1]; // Extract base64 content
+        const folderPath = "documents"; // Folder where the PDF will be stored
+        const fileName = `receipt_${Date.now()}.pdf`;
+        const filePath = `${folderPath}/${fileName}`;
 
-    iframe.style.display = "none";
-    iframe.src = url;
+        // 1️⃣ Ensure the folder exists before writing the file
+        try {
+          await Filesystem.readdir({
+            path: folderPath,
+            directory: Directory.Documents,
+          });
+        } catch (e) {
+          await Filesystem.mkdir({
+            path: folderPath,
+            directory: Directory.Documents,
+            recursive: true,
+          });
+        }
 
-    document.body.appendChild(iframe);
+        // 2️⃣ Save the PDF file in the device storage
+        await Filesystem.writeFile({
+          path: filePath,
+          data: base64data,
+          directory: Directory.Documents,
+          encoding: Encoding.Base64,
+        });
 
-    iframe.onload = () => {
-      iframe.contentWindow.print(); // Trigger print
-    };
+        // 3️⃣ Get file URI
+        const fileUri = await Filesystem.getUri({
+          path: filePath,
+          directory: Directory.Documents,
+        });
+
+        // 4️⃣ Open the file using Android's share menu (includes print option)
+        await Share.share({
+          title: "Print Receipt",
+          url: fileUri.uri,
+          dialogTitle: "Open PDF & Print",
+        });
+      };
+
+      reader.readAsDataURL(blob); // Convert blob to base64
+    } catch (error) {
+      console.error("Error printing bill:", error);
+    }
   };
 
   const [selectedFilter, setSelectedFilter] = useState("Today");

@@ -15,8 +15,8 @@ export function UserContextProvider({ children }) {
     const storedToken = localStorage.getItem("dsquare_token");
 
     if (storedToken && !user) {
-      api
-        .get("/trucks", {
+      axios
+        .get("https://d2square-server.d2delight.com/api/trucks", {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },

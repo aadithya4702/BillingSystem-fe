@@ -1,4 +1,6 @@
 import { toast } from "react-toastify";
+import { Http } from "@capacitor-community/http";
+import { CapacitorHttp } from "@capacitor/core";
 import api from "./axiosInstance";
 
 export const registerUser = async (userData) => {
@@ -9,19 +11,35 @@ export const registerUser = async (userData) => {
     handleError(error);
   }
 };
-
 export const loginUser = async (userData) => {
   try {
-    const response = await api.post("/login", userData);
-    return response;
+    if (Capacitor.getPlatform() === "android") {
+      // Use Capacitor HTTP plugin (which bypasses SSL verification)
+      const response = await CapacitorHttp.post({
+        url: "https://d2square-server.d2delight.com/api/login", // Use full URL here
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        data: userData,
+        params: {},
+        connectTimeout: 5000,
+      });
+      return response;
+    } else {
+      // Use Axios for Web/iOS
+      const response = await api.post("/login", userData);
+      return response;
+    }
   } catch (error) {
-    handleError(error);
+    console.error("Login Error:", error);
+    return { error: "Login failed" };
   }
 };
 
 export const getTruckDetails = async () => {
   try {
-    const token = localStorage.getItem("dsquare_token"); // Get token dynamically
+    const token = localStorage.getItem("dsquare_token");
     if (!token) {
       throw new Error("No token found. Please log in again.");
     }

@@ -10,6 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor-community/http": "^1.4.1",
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/browser": "^6.0.5",
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/filesystem": "^6.0.3",
+    "@capacitor/share": "^6.0.3",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
