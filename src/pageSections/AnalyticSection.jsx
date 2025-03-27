@@ -13,6 +13,8 @@ import axios from "axios";
 import { getMostOrders, getRecentOrders } from "../api/Analytics";
 import { generateBill } from "../api/Bill";
 import { toast } from "react-toastify";
+import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 
 const AnalyticSection = () => {
   // Get Formatted Date
