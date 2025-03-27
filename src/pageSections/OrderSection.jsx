@@ -374,7 +374,7 @@ const OrderSection = () => {
         {/* Orders Header & Toggle Button */}
         {/* Title for Small Screens (Collapsible) */}
         <div
-          className="flex justify-between sticky top-0 bg-gray-800 z-10 p-2  items-center cursor-pointer md:hidden"
+          className="flex justify-between sticky top-0 bg-gray-800 z-20 p-2  items-center cursor-pointer md:hidden"
           onClick={() => setShowCart(!showCart)}
         >
           <h2 className="text-xl font-bold  text-white">Orders</h2>
