@@ -264,7 +264,7 @@ const OrderSection = () => {
           </div>
         </div>
 
-        <div className="pl-6 grid grid-cols-1 pr-6 relative sm:grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-6">
+        <div className="pl-6 grid grid-cols-2 pr-6 relative sm:grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-6">
           {filteredProducts.map((product) => {
             const cartItem = cart.find((item) => item.id === product.id);
 
