@@ -1,6 +1,6 @@
 {
   "appId": "com.foodshack.in",
-  "appName": "FoodShack",
+  "appName": "D²",
   "webDir": "dist",
   "CapacitorHttp": {
    "enabled": true
