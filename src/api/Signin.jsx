@@ -14,9 +14,8 @@ export const registerUser = async (userData) => {
 export const loginUser = async (userData) => {
   try {
     if (Capacitor.getPlatform() === "android") {
-      // Use Capacitor HTTP plugin (which bypasses SSL verification)
       const response = await CapacitorHttp.post({
-        url: "https://d2square-server.d2delight.com/api/login", // Use full URL here
+        url: "https://d2square-server.d2delight.com/api/login",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -64,7 +63,7 @@ export const logoutCall = async () => {
     }
     const response = await api.post("/logout", {
       headers: {
-        Authorization: `Bearer ${token}`, // Attach updated token
+        Authorization: `Bearer ${token}`,
       },
     });
     return response;
