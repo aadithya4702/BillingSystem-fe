@@ -369,7 +369,7 @@ const OrderSection = () => {
         className={`fixed bottom-14 md:top-0 left-0  w-full md:w-2/5 lg:w-1/3 bg-gray-800  md:p-2  transition-all duration-300 md:relative md:h-screen md:overflow-auto flex flex-col z-20 ${
           showCart ? "h-1/3 overflow-y-auto" : "h-[50px]"
         }`}
-        style={{ boxShadow: "0 -8px 6px -2px rgba(234, 124 ,s105, 0.3)" }} // Custom top shadow (Red)
+        style={{ boxShadow: "0 -8px 6px -2px rgba(234, 124 , 105, 0.3)" }} // Custom top shadow (Red)
       >
         {/* Orders Header & Toggle Button */}
         {/* Title for Small Screens (Collapsible) */}
