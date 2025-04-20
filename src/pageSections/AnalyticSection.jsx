@@ -15,6 +15,8 @@ import { generateBill } from "../api/Bill";
 import { toast } from "react-toastify";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
+import OrderPreviewModal from "../components/OrderPreviewModal";
+import { fetchOrder } from "../api/Order";
 
 const AnalyticSection = () => {
   // Get Formatted Date
@@ -50,73 +52,31 @@ const AnalyticSection = () => {
     },
   ]);
 
-  const handlePrintReceipt = async (receiptId) => {
-    try {
-      const bill = await generateBill(receiptId); // Use passed `receiptId` instead of hardcoded one
+  const [showPreview, setShowPreview] = useState(false);
+  const [orderData, setOrderData] = useState({
+    foodOrder: [],
+    foodOrderItem: [],
+  });
 
-      if (bill) {
-        toast.success("Bill generated");
-        printBillDirectly(bill);
+  const handlePreviewClick = async (orderId) => {
+    try {
+      const res = await fetchOrder(orderId);
+      const data = res.data;
+
+      if (data.success) {
+        setOrderData({
+          foodOrder: data.foodOrder,
+          foodOrderItem: data.foodOrderItem,
+        });
+        setShowPreview(true);
       } else {
-        console.error("Bill generation returned no data.");
-        toast.error("Failed to generate bill. Please try again.");
+        console.error("Failed to fetch order");
       }
-    } catch (error) {
-      console.error("Error printing receipt:", error);
-      toast.error("An error occurred while printing the receipt.");
+    } catch (err) {
+      console.error("Error fetching order:", err);
     }
   };
 
-  const printBillDirectly = async (blob) => {
-    try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64data = reader.result.split(",")[1]; // Extract base64 content
-        const folderPath = "documents"; // Folder where the PDF will be stored
-        const fileName = `receipt_${Date.now()}.pdf`;
-        const filePath = `${folderPath}/${fileName}`;
-
-        // 1️⃣ Ensure the folder exists before writing the file
-        try {
-          await Filesystem.readdir({
-            path: folderPath,
-            directory: Directory.Documents,
-          });
-        } catch (e) {
-          await Filesystem.mkdir({
-            path: folderPath,
-            directory: Directory.Documents,
-            recursive: true,
-          });
-        }
-
-        // 2️⃣ Save the PDF file in the device storage
-        await Filesystem.writeFile({
-          path: filePath,
-          data: base64data,
-          directory: Directory.Documents,
-          encoding: Encoding.Base64,
-        });
-
-        // 3️⃣ Get file URI
-        const fileUri = await Filesystem.getUri({
-          path: filePath,
-          directory: Directory.Documents,
-        });
-
-        // 4️⃣ Open the file using Android's share menu (includes print option)
-        await Share.share({
-          title: "Print Receipt",
-          url: fileUri.uri,
-          dialogTitle: "Open PDF & Print",
-        });
-      };
-
-      reader.readAsDataURL(blob); // Convert blob to base64
-    } catch (error) {
-      console.error("Error printing bill:", error);
-    }
-  };
 
   const [selectedFilter, setSelectedFilter] = useState("Today");
   const [selectedRecentOrderFilter, setselectedRecentOrderFilter] =
@@ -326,7 +286,7 @@ const AnalyticSection = () => {
                     recentOrders.map((order, index) => (
                       <tr
                         key={index}
-                        onClick={() => handlePrintReceipt(order.order_id)}
+                        onClick={() => handlePreviewClick(order.order_id)}
                         className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 border-b border-gray-300 dark:border-gray-700 cursor-pointer"
                       >
                         <td className="px-2 md:px-4 py-4 font-medium text-gray-800 dark:text-gray-200">
@@ -358,6 +318,13 @@ const AnalyticSection = () => {
             </div>
           </div>
         </div>
+
+        <OrderPreviewModal
+          isOpen={showPreview}
+          onClose={() => setShowPreview(false)}
+          foodOrder={orderData.foodOrder}
+          foodOrderItem={orderData.foodOrderItem}
+        />
 
         {/* Right Section */}
         <div className="w-full  lg:w-2/5">

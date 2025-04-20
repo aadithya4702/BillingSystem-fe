@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { Search, Trash, ChevronDown, ChevronUp } from "lucide-react";
 import React from "react";
 import { getDishes } from "../api/Dishes";
-import { placeOrder } from "../api/Order";
+import {
+  deleteOrderById,
+  fetchOrder,
+  placeOrder,
+  updateOrderById,
+} from "../api/Order";
 import { toast } from "react-toastify";
 import EmptyCart from "../assets/empty_cart.svg";
 import logo from "../assets/d2_logo.png";
@@ -14,7 +19,10 @@ import {
   faWallet,
   faMoneyBillTransfer,
   faCreditCard,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
+import { getCategories } from "../api/Categories";
+import api from "../api/axiosInstance";
 
 const OrderSection = () => {
   const [isExpanded, setIsExpanded] = useState(false); // Toggle state
@@ -25,22 +33,11 @@ const OrderSection = () => {
   const [cart, setCart] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState("cash");
   const [showCart, setShowCart] = useState(true);
-  const categoriesData = [
-    "Veg",
-    "Non-Veg",
-    "Veg",
-    "Non-Veg",
-    "Veg",
-    "Non-Veg",
-    "Veg",
-    "Non-Veg",
-    "Veg",
-    "Non-Veg",
-    "Veg",
-    "aaaaaaaaaaaaaaaaaaaaaaaa",
-  ];
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [userName, setUserName] = useState("");
+  const [searchedOrderId, setSearchedOrderId] = useState(null); // null = new order
+  const [searchId, setSearchId] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -57,6 +54,15 @@ const OrderSection = () => {
           setProducts(formattedData);
         } else {
           throw new Error("Invalid product data format");
+        }
+
+        const categoryResponse = await getCategories();
+        const categoryData = categoryResponse.data;
+
+        if (Array.isArray(categoryData)) {
+          setCategories(categoryData);
+        } else {
+          throw new Error("Invalid category data format");
         }
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -195,6 +201,106 @@ const OrderSection = () => {
     });
   };
 
+  const fetchOrderById = async (orderId) => {
+    try {
+      const res = await fetchOrder(orderId);
+      const orderData = res.data;
+
+      if (!orderData.foodOrderItem || orderData.foodOrderItem.length === 0) {
+        toast.warning("No order found with this ID.");
+        setSearchedOrderId(null);
+        setCart([]);
+        return;
+      }
+
+      const fetchedCart = orderData.foodOrderItem.flatMap((item) =>
+        item.metadata.map((m) => ({
+          id: m.food_id,
+          name: m.name, // use a fallback or fetch name separately
+          price: m.price,
+          qty: m.quantity,
+        }))
+      );
+
+      setCart(fetchedCart);
+      setSearchedOrderId(orderId);
+      console.log("Fetched Cart", fetchedCart);
+    } catch (err) {
+      console.error("Error in fetchOrderById:", err);
+      setSearchedOrderId(null);
+      setCart([]);
+    }
+  };
+
+  const updateOrder = async () => {
+    try {
+      const truckData = localStorage.getItem("dsquare_valid_truck");
+
+      if (!truckData) {
+        throw new Error("No truck data found. Please log in again.");
+      }
+
+      const truck = JSON.parse(truckData);
+
+      if (!truck.id) {
+        throw new Error("Invalid truck data. Please log in again.");
+      }
+
+      if (selectedPayment == "") {
+        toast.error("Select payment to checkout");
+        return;
+      }
+      const updatedData = {
+        customer_number: "1235",
+        status: "completed",
+        truck_id: truck.id,
+        payment_type: selectedPayment,
+        orders: cart.map((item) => ({
+          food_id: item.id,
+          quantity: item.qty,
+          price: item.price,
+          subtotal: item.qty * item.price,
+        })),
+      };
+
+      const res = await updateOrderById(updatedData, searchedOrderId);
+      if (res.success) {
+        toast.success("Order updated");
+        const bill = await generateBill(searchedOrderId);
+        if (bill) {
+          printBillDirectly(bill);
+        } else {
+          throw new Error("Error generating bill");
+        }
+        setCart([]);
+        setSearchedOrderId(null);
+      }
+    } catch (err) {
+      toast.error("Failed to update order");
+      console.error(err);
+    }
+  };
+
+  const deleteOrder = async () => {
+    try {
+      const res = await deleteOrderById(searchedOrderId);
+      if (res.success) {
+        toast.success("Order deleted");
+        setCart([]);
+        setSearchedOrderId(null);
+      }
+    } catch (err) {
+      toast.error("Failed to delete order");
+      console.error(err);
+    }
+  };
+
+  const cancelOrderFetch = () => {
+    setCart([]);
+    setSearchId("");
+    setSearchedOrderId(null);
+  };
+
   const removeFromCart = (id) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
@@ -205,9 +311,13 @@ const OrderSection = () => {
     );
   };
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch =
+      search === "" || p.name.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory =
+      !selectedCategory || p.category.name === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const subtotal = cart
     .reduce((acc, item) => acc + (parseFloat(item.price) || 0) * item.qty, 0)
@@ -228,10 +338,10 @@ const OrderSection = () => {
   };
 
   return (
-    <div className="flex  flex-col md:flex-row max-h-screen md:pb-0 pb-20   overflow-y-auto bg-gray-900 text-white">
+    <div className="flex  flex-col md:flex-row max-h-screen md:pb-0 pb-20 max-w-[100vw]    overflow-y-auto bg-gray-900 text-white">
       {/* Main Content */}
       <main className="w-full   flex-1 pb-6  custom-scrollbar mb-10 overflow-auto">
-        <div className="mb-4 bg-gray-900 p-4 sticky top-0 z-10">
+        <div className="mb-4 bg-gray-900  p-4  sticky top-0 z-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Left Section - Title & Date */}
             <div className="flex items-center   rounded-lg">
@@ -262,9 +372,38 @@ const OrderSection = () => {
               />
             </div>
           </div>
+          <div className="overflow-x-auto flex gap-3 mt-4 px-1">
+            <div
+              onClick={() => setSelectedCategory("")}
+              className={`cursor-pointer rounded-full px-4 py-2 text-sm font-semibold border whitespace-nowrap transition duration-300 shadow-sm ${
+                selectedCategory === ""
+                  ? "bg-gradient-to-r from-red-500 to-orange-500 text-white border-transparent"
+                  : "bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700"
+              }`}
+            >
+              All
+            </div>
+            {categories.map((category, index) => (
+              <div
+                key={index}
+                onClick={() => setSelectedCategory(category.name)}
+                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-semibold border whitespace-nowrap transition duration-300 shadow-sm ${
+                  selectedCategory === category.name
+                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white border-transparent"
+                    : "bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700"
+                }`}
+              >
+                {category.name}
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="pl-6 pr-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="pl-6 pr-6 grid grid-cols-1 sm:grid-cols-2   lg:grid-cols-3 gap-6">
+          {filteredProducts.length === 0 && (
+            <p className="text-gray-500  text-center  mt-4">No items found.</p>
+          )}
+
           {filteredProducts.map((product) => {
             const cartItem = cart.find((item) => item.id === product.id);
 
@@ -387,6 +526,19 @@ const OrderSection = () => {
         <h2 className="hidden mt-5 md:block text-xl  font-bold text-white  mb-4">
           # Orders
         </h2>
+        <div className="relative mx-2 ">
+          <input
+            className="pl-2 pr-4 py-2 bg-gray-700 text-white rounded w-full"
+            placeholder="Search order id..."
+            value={searchId}
+            onChange={(e) => setSearchId(e.target.value)}
+          />
+          <FontAwesomeIcon
+            icon={faSearch}
+            onClick={() => fetchOrderById(searchId)} // <-- passing the order ID
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-500 p-1 rounded-lg text-white"
+          />
+        </div>
 
         {/* Order Items (Show only when expanded) */}
         <div
@@ -509,12 +661,45 @@ const OrderSection = () => {
             <p className="text-lg font-semibold text-white">
               Subtotal: ₹{subtotal}
             </p>
-            <button
-              onClick={orderSubmit}
-              className="w-full mt-2 bg-highlight-bg-icon hover:bg-red-600 p-2 rounded"
-            >
-              Checkout
-            </button>
+            {showCart && cart.length > 0 && (
+              <div className="mt-4 p-2 border-t border-gray-700 pt-4">
+                <p className="text-lg font-semibold text-white">
+                  Subtotal: ₹{subtotal}
+                </p>
+
+                {searchedOrderId ? (
+                  <>
+                    <button
+                      onClick={updateOrder}
+                      className="w-full mt-2 bg-green-500 hover:bg-green-600 p-2 rounded"
+                    >
+                      Update Order
+                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={deleteOrder}
+                        className="w-full mt-2 bg-red-600 hover:bg-red-700 p-2 rounded"
+                      >
+                        Delete Order
+                      </button>
+                      <button
+                        onClick={cancelOrderFetch}
+                        className="w-full mt-2 bg-red-600 hover:bg-red-700 p-2 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button
+                    onClick={orderSubmit}
+                    className="w-full mt-2 bg-highlight-bg-icon hover:bg-red-600 p-2 rounded"
+                  >
+                    Checkout
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </aside>

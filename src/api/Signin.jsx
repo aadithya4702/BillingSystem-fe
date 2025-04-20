@@ -15,7 +15,7 @@ export const loginUser = async (userData) => {
   try {
     if (Capacitor.getPlatform() === "android") {
       const response = await CapacitorHttp.post({
-        url: "https://d2square-server.d2delight.com/api/login",
+        url: "http://localhost:8000/api/login",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",

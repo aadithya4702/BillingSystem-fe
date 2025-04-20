@@ -16,7 +16,7 @@ export function UserContextProvider({ children }) {
 
     if (storedToken && !user) {
       axios
-        .get("https://d2square-server.d2delight.com/api/trucks", {
+        .get("http://localhost:8000/api/trucks", {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },
