@@ -3,12 +3,26 @@ import { generateBill } from "../api/Bill";
 import { toast } from "react-toastify";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
+import { deleteOrderById } from "../api/Order";
 
 const OrderPreviewModal = ({ isOpen, onClose, foodOrder, foodOrderItem }) => {
   if (!isOpen) return null;
 
   const order = foodOrder[0]; // assuming single order
   const items = foodOrderItem[0]?.metadata || [];
+
+  const deleteOrder = async (orderId) => {
+    try {
+      const res = await deleteOrderById(orderId);
+      if (res.success) {
+        toast.success("Order deleted");
+        onClose();
+      }
+    } catch (err) {
+      toast.error("Failed to delete order");
+      console.error(err);
+    }
+  };
 
   const handlePrintReceipt = async (receiptId) => {
     try {
@@ -84,6 +98,7 @@ const OrderPreviewModal = ({ isOpen, onClose, foodOrder, foodOrderItem }) => {
       <div className="bg-custom-dark-purple text-white rounded-xl shadow-lg max-w-md w-full sm:max-w-2xl overflow-auto max-h-[90vh]">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-xl font-semibold">Order Preview</h2>
+
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-red-500 transition"
@@ -155,9 +170,15 @@ const OrderPreviewModal = ({ isOpen, onClose, foodOrder, foodOrderItem }) => {
           <div className="flex justify-end gap-2 pt-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 transition"
+              className="px-4 py-2 rounded border border-gray-200 hover:border-red-500 hover:text-red-500  transition"
             >
               Close
+            </button>
+            <button
+              onClick={() => deleteOrder(order.order_id)}
+              className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 transition"
+            >
+              Delete
             </button>
             <button
               onClick={() => handlePrintReceipt(order.order_id)}

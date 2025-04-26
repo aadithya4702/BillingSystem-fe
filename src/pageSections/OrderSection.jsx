@@ -684,7 +684,7 @@ const OrderSection = () => {
                       </button>
                       <button
                         onClick={cancelOrderFetch}
-                        className="w-full mt-2 bg-red-600 hover:bg-red-700 p-2 rounded"
+                        className="w-full mt-2 border border-red-500 hover:text-red-600 p-2 rounded"
                       >
                         Cancel
                       </button>
