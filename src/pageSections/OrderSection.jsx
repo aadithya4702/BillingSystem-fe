@@ -263,34 +263,34 @@ const OrderSection = () => {
             </div>
           </div>
         </div>
+        <div className="grid-rows mt-4 mb-2">
+          <div className="pl-6 grid grid-cols-2 pr-6 relative sm:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 gap-6">
+            {filteredProducts.map((product) => {
+              const cartItem = cart.find((item) => item.id === product.id);
 
-        <div className="pl-6 pr-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => {
-            const cartItem = cart.find((item) => item.id === product.id);
-
-            return (
-              <div
-                key={product.id}
-                className="bg-gray-800 p-6 mt-10 pt-16 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 cursor-pointer border border-gray-700 relative"
-              >
-                {/* Floating Circular Image */}
-                <div className="w-full flex justify-center absolute top-[-40px] left-1/2 transform -translate-x-1/2">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="rounded-full object-cover h-[100px] w-[100px] bg-black border-4 border-gray-800 shadow-md"
-                  />
-                </div>
-                <h2
-                  className="lg:text-lg text-sm font-light text-white text-center mt-3 text-ellipsis whitespace-normal overflow-hidden"
-                  title={`${product.name}`}
+              return (
+                <div
+                  key={product.id}
+                  className="bg-gray-800 p-6 mt-10 pt-16 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:scale-105 cursor-pointer border border-gray-700 relative"
                 >
-                  {product.name}
-                </h2>
-                <p className="text-gray-300 lg:text-lg text-sm  font-medium mt-1 text-center">
-                  ₹ {product.price.toFixed(2)}
-                </p>
-                {/* <div className="flex justify-center">
+                  {/* Floating Circular Image */}
+                  <div className="w-full flex justify-center absolute top-[-40px] left-1/2 transform -translate-x-1/2">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="rounded-full object-cover h-[100px] w-[100px] bg-black border-4 border-gray-800 shadow-md"
+                    />
+                  </div>
+                  <h2
+                    className="lg:text-lg text-sm font-light text-white text-center mt-3 text-ellipsis whitespace-normal overflow-hidden"
+                    title={`${product.name}`}
+                  >
+                    {product.name}
+                  </h2>
+                  <p className="text-gray-300 lg:text-lg text-sm  font-medium mt-1 text-center">
+                    ₹ {product.price.toFixed(2)}
+                  </p>
+                  {/* <div className="flex justify-center">
                   <p
                     className="text-sm text-gray-500  truncate overflow-hidden whitespace-nowrap max-w-[200px]"
                     title={`${product.description}`}
@@ -299,69 +299,70 @@ const OrderSection = () => {
                   </p>
                 </div> */}
 
-                {/* Cart Controls */}
-                <div className="mt-4 ">
-                  {cartItem && cartItem.qty > 0 ? (
-                    <div className="flex items-center justify-between">
-                      {/* Quantity Selector */}
-                      <div className="flex items-center justify-center gap-5  p-2 rounded-lg w-full">
-                        {/* Decrease Quantity */}
-                        <button
-                          className="bg-red-500 hover:bg-red-500 text-white px-3 py-1 rounded-lg"
-                          onClick={() => {
-                            const newQty = Math.max(cartItem.qty - 1, 0);
-                            if (newQty === 0) {
-                              // Remove item from cart if quantity is 0
-                              removeFromCart(product.id);
-                            } else {
-                              updateQty(product.id, newQty);
+                  {/* Cart Controls */}
+                  <div className="mt-4 ">
+                    {cartItem && cartItem.qty > 0 ? (
+                      <div className="flex items-center justify-between">
+                        {/* Quantity Selector */}
+                        <div className="flex items-center justify-center gap-5  p-2 rounded-lg w-full">
+                          {/* Decrease Quantity */}
+                          <button
+                            className="bg-red-500 hover:bg-red-500 text-white px-3 py-1 rounded-lg"
+                            onClick={() => {
+                              const newQty = Math.max(cartItem.qty - 1, 0);
+                              if (newQty === 0) {
+                                // Remove item from cart if quantity is 0
+                                removeFromCart(product.id);
+                              } else {
+                                updateQty(product.id, newQty);
+                              }
+                            }}
+                          >
+                            -
+                          </button>
+
+                          {/* Quantity Display */}
+                          <span className="text-white font-semibold ">
+                            {cartItem.qty}
+                          </span>
+
+                          {/* Increase Quantity */}
+                          <button
+                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg"
+                            onClick={() =>
+                              updateQty(product.id, cartItem.qty + 1)
                             }
-                          }}
-                        >
-                          -
-                        </button>
+                          >
+                            +
+                          </button>
+                        </div>
 
-                        {/* Quantity Display */}
-                        <span className="text-white font-semibold ">
-                          {cartItem.qty}
-                        </span>
-
-                        {/* Increase Quantity */}
-                        <button
-                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg"
-                          onClick={() =>
-                            updateQty(product.id, cartItem.qty + 1)
-                          }
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* Delete Button */}
-                      {/* <button
+                        {/* Delete Button */}
+                        {/* <button
                         className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg ml-2"
                         onClick={() => removeFromCart(product.id)}
                       >
                         🗑️
                       </button> */}
-                    </div>
-                  ) : (
-                    <button
-                      className={`w-full py-2 rounded-lg transition-colors duration-300 ${
-                        product.is_available
-                          ? "bg-highlight-bg-icon hover:bg-red-500 text-white"
-                          : "bg-gray-600 text-gray-400 cursor-not-allowed"
-                      }`}
-                      onClick={() => addToCart(product)}
-                      disabled={!product.is_available}
-                    >
-                      {product.is_available ? "Add to cart" : "Not Available"}
-                    </button>
-                  )}
+                      </div>
+                    ) : (
+                      <button
+                        className={`w-full py-2 rounded-lg transition-colors duration-300 ${
+                          product.is_available
+                            ? "bg-highlight-bg-icon hover:bg-red-500 text-white"
+                            : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        }`}
+                        onClick={() => addToCart(product)}
+                        disabled={!product.is_available}
+                      >
+                        {product.is_available ? "Add to cart" : "Not Available"}
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </main>
 
